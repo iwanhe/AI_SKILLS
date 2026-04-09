@@ -123,6 +123,7 @@ Naming conventions for variables:
 - `out_` prefix for variables holding output/return values.
 - `rec` for `%ROWTYPE` record variables (no prefix needed).
 - `in_`, `out_`, `io_` prefixes for parameters.
+- `p_` prefix for parameters in APEX callback functions (e.g., `p_username`, `p_password` in authentication functions) — use this only when the APEX API signature requires it.
 
 
 ## 5. Blank Lines and Section Separators
@@ -189,48 +190,77 @@ Use section header comments with dashes for major groupings inside package specs
 ```
 
 
-## 6. SQL Statement Formatting
+## 6. SQL Statements Embedded in PL/SQL
 
-### SELECT Statements
+**Core principle: SQL statements inside PL/SQL follow the same formatting rules as standalone SQL (defined in the `sql-formatter` skill), but shifted right to match the PL/SQL indentation context.** The SQL structure itself does not change — only the base indent moves.
 
-Each column in the select list gets its own line, indented beyond `SELECT`. Table aliases are short (single letter or abbreviation). `WHERE` conditions align with the join style.
+Think of it this way: take any properly formatted standalone SQL statement, then indent the whole thing to the position where it appears in the PL/SQL code. The internal alignment (column aliases, WHERE operators, JOIN conditions, CASE expressions, `--` separators) stays exactly the same relative to the SQL's own `SELECT`/`FROM`/`WHERE` keywords.
+
+### How indentation works
+
+Inside a package body subprogram, code is at 8 spaces (2 levels). An embedded SQL statement starts its top-level clauses (`SELECT`, `FROM`, `WHERE`, `ORDER BY`, `GROUP BY`) at that same 8-space level, then follows all the `sql-formatter` rules relative to that base:
 
 ```sql
-        SELECT
-            LOWER(c.table_name)     AS table_name,
+        SELECT                                              -- 8 spaces: same as PL/SQL code
+            LOWER(c.table_name)     AS table_name,          -- 12 spaces: column list
             LOWER(c.column_name)    AS column_name,
             c.position              AS column_id,
             COUNT(*) OVER()         AS columns#
-        FROM user_cons_columns c
+        FROM user_cons_columns c                            -- 8 spaces: back to SQL base
         JOIN user_constraints n
-            ON n.constraint_name    = c.constraint_name
-        WHERE n.table_name          = UPPER(in_table_name)
-            AND n.constraint_type   = 'P'
+            ON n.constraint_name    = c.constraint_name     -- 12 spaces: JOIN condition
+        WHERE n.table_name          = UPPER(in_table_name)  -- 8 spaces
+            AND n.constraint_type   = 'P'                   -- 12 spaces: AND conditions
         ORDER BY c.position;
 ```
 
-Key SQL formatting rules:
-
-- `SELECT`, `FROM`, `WHERE`, `ORDER BY`, `GROUP BY`, `HAVING` all start at the same indent level.
-- Columns in the select list are indented one level further and aligned.
-- Column aliases (`AS ...`) are aligned vertically.
-- `JOIN` aligns with `FROM`. The `ON` clause indents under the `JOIN` with conditions aligned.
-- `WHERE` conditions: first condition on same line or next line. Subsequent `AND`/`OR` conditions indent to align under the first condition, with `AND`/`OR` leading each line.
-- Use `=` alignment in WHERE clauses — pad the left side so `=` signs line up.
-
-### Dynamic WHERE with optional filters (WHERE 1 = 1 pattern)
-
-When building queries where multiple conditions are optional (any of them may be NULL), use `WHERE 1 = 1` as the anchor, with each optional condition on its own line using `AND (col = param OR param IS NULL)`:
+Inside a cursor FOR loop (which adds another nesting level), the SQL base shifts to 12 spaces:
 
 ```sql
-        WHERE 1 = 1
-            AND (t.lock_id      = in_lock_id        OR in_lock_id       IS NULL)
-            AND (t.locked_by    = in_locked_by      OR in_locked_by     IS NULL)
-            AND (t.object_name  = in_object_name    OR in_object_name   IS NULL)
-            AND (t.object_type  = in_object_type    OR in_object_type   IS NULL)
+        FOR c IN (
+            SELECT                                          -- 12 spaces: SQL base inside FOR
+                t.column_value,                             -- 16 spaces: column list
+                t.r#,
+                COUNT(*) OVER() AS total#
+            FROM (
+                SELECT ...                                  -- 16 spaces: subquery adds another level
+            ) t
+        ) LOOP
+            -- body
+        END LOOP;
+```
+
+### What sql-formatter rules apply inside PL/SQL
+
+All of them. Specifically:
+
+- **Column lists**: one per line, `AS` aliases aligned (sql-formatter §4)
+- **`--` separators**: bare `--` between column groups in SELECT (sql-formatter §5)
+- **WHERE 1 = 1**: use as anchor for multi-condition WHERE (sql-formatter §6)
+- **WHERE alignment**: pad columns so operators (`=`, `LIKE`, `>=`) align vertically (sql-formatter §6)
+- **JOINs**: `JOIN` aligns with `FROM`, `ON` indented 4 spaces under JOIN (sql-formatter §7)
+- **CTEs**: `WITH ... AS (` structure, short aliases, pipeline pattern (sql-formatter §8)
+- **CASE expressions**: WHEN/END indented, inline CASE in aggregates (sql-formatter §9)
+- **GROUP BY ALL** preferred, ORDER BY with positional references (sql-formatter §10)
+- **UNION ALL**: each block has own WHERE, ORDER BY at end (sql-formatter §11)
+- **Window functions**: OVER on same line when short (sql-formatter §13)
+- **NULLIF(..., 0)**: for aggregates that should be null when zero (sql-formatter §14)
+- **MERGE**: target `t`, source `s`, USING subquery, WHEN MATCHED/NOT MATCHED (sql-formatter §20)
+
+### SELECT INTO (single row)
+
+`INTO` goes on its own line between `SELECT` and `FROM`, at the same indent as `SELECT`:
+
+```sql
+        SELECT MAX(a.owner)
+        INTO out_owner
+        FROM apex_applications a
+        WHERE a.application_id = COALESCE(in_app_id, core.get_context_app());
 ```
 
 ### INSERT / UPDATE / DELETE
+
+Follow sql-formatter alignment for SET, VALUES, and WHERE. Align `=` signs in SET columns:
 
 ```sql
         UPDATE core_locks t
@@ -241,34 +271,59 @@ When building queries where multiple conditions are optional (any of them may be
         WHERE t.lock_id         = in_lock_id;
 ```
 
-### SELECT INTO (single row)
+### MERGE inside PL/SQL
 
-For simple single-row queries, `SELECT ... INTO` can go on one line if short:
+Follows exactly the same structure as standalone MERGE (sql-formatter §20), just indented to the PL/SQL context:
 
 ```sql
-        SELECT MAX(a.owner)
-        INTO out_owner
-        FROM apex_applications a
-        WHERE a.application_id = COALESCE(in_app_id, core.get_context_app());
+        MERGE INTO xxapp_applications t
+        USING (
+            SELECT
+                a.workspace,
+                a.application_id            AS app_id,
+                --
+                a.application_name          AS app_name
+            FROM apex_applications a
+            LEFT JOIN apex_application_pages p
+                ON p.application_id         = a.application_id
+        ) s
+        ON (
+            s.app_id = t.app_id
+        )
+        WHEN MATCHED THEN
+            UPDATE SET
+                t.workspace         = s.workspace,
+                t.app_alias         = s.app_alias
+        WHEN NOT MATCHED THEN
+            INSERT (
+                workspace,
+                app_id,
+                app_alias
+            )
+            VALUES (
+                s.workspace,
+                s.app_id,
+                s.app_alias
+            );
 ```
 
 ### Cursor FOR Loops
 
+The opening `(` is on the same line as `FOR c IN`, the `SELECT` is indented inside, and `) LOOP` closes at the `FOR` indent level:
+
 ```sql
         FOR c IN (
             SELECT
-                t.column_value,
-                t.r#,
-                COUNT(*) OVER() AS total#
-            FROM (
-                SELECT ...
-            ) t
+                t.is_modal,
+                t.page_name,
+                t.page_title
+            FROM xxapp_pages t
+            WHERE t.app_id      = core.get_app_id()
+                AND t.page_id   = core.get_page_id()
         ) LOOP
             -- body
         END LOOP;
 ```
-
-The opening `(` is on the same line as `FOR c IN`, the `SELECT` is indented inside, and `) LOOP` closes at the `FOR` indent level.
 
 
 ## 7. Named Parameter Calls
@@ -570,14 +625,25 @@ When multiple assignments occur in sequence, align the `:=` operators:
 
 ### PRAGMA AUTONOMOUS_TRANSACTION
 
-Goes immediately after `AS`, separated from variables by a bare `--`:
+Goes in the declaration section, either immediately after `AS` (before variables) or after variable declarations. Separated from other declarations by a bare `--`:
 
 ```sql
+    -- Form 1: before variables
     AS
         PRAGMA AUTONOMOUS_TRANSACTION;
         --
         rec                 core_locks%ROWTYPE;
         v_hash_check        BOOLEAN := in_hash_check;
+    BEGIN
+```
+
+```sql
+    -- Form 2: after variables
+    AS
+        v_log_id                core_logs.log_id%TYPE;
+        v_next_interval         xxapp_user_pings.next_interval%TYPE;
+        --
+        PRAGMA AUTONOMOUS_TRANSACTION;
     BEGIN
 ```
 
@@ -607,12 +673,132 @@ For functions used primarily in SQL, place after `AS` with a bare `--` separator
 
 ### AUTHID and RESETTABLE
 
-Package-level pragmas go on the line after `CREATE OR REPLACE PACKAGE`, before `AS`:
+Package-level pragmas go on the line after `CREATE OR REPLACE PACKAGE`, before `AS`. Use `AUTHID CURRENT_USER` for packages that run with the caller's privileges, `AUTHID DEFINER` for packages that run with the owner's privileges. Add `RESETTABLE` when package state should reset on session boundary:
 
 ```sql
 CREATE OR REPLACE PACKAGE core
 AUTHID CURRENT_USER RESETTABLE
 AS
+```
+
+```sql
+CREATE OR REPLACE PACKAGE xxapp_auth
+AUTHID DEFINER RESETTABLE
+AS
+```
+
+
+## 17. Record-Based DML Patterns
+
+### UPDATE SET ROW
+
+When updating an entire row from a record variable, use `SET ROW = rec`:
+
+```sql
+        UPDATE xxapp_user_pings t
+        SET ROW = rec
+        WHERE t.user_id         = rec.user_id
+            AND t.app_id        = rec.app_id;
+```
+
+### INSERT VALUES rec
+
+When inserting an entire record variable:
+
+```sql
+        INSERT INTO xxapp_user_pings
+        VALUES rec;
+```
+
+### INSERT INTO ... SET (Oracle 23c)
+
+For explicit column-value assignment on insert:
+
+```sql
+        INSERT INTO xxapp_user_pings t
+        SET t.ping_id           = core.get_id(),
+            t.user_id           = core.get_user_id(),
+            t.app_id            = core.get_context_app(),
+            t.session_id        = 0,
+            t.status            = 'SUCCESS',
+            t.next_interval     = g_default_ping_interval,
+            t.delivered_at      = SYSDATE,
+            t.created_by        = core.get_user_id(),
+            t.created_at        = SYSDATE;
+```
+
+Align the `=` operators vertically, same as UPDATE SET formatting.
+
+### SQL%ROWCOUNT pattern
+
+Use `SQL%ROWCOUNT` to check DML results and branch. Common pattern for "upsert" logic:
+
+```sql
+        UPDATE xxapp_user_pings t
+        SET ROW = rec
+        WHERE t.user_id         = rec.user_id
+            AND t.app_id        = rec.app_id;
+        --
+        IF SQL%ROWCOUNT = 0 THEN
+            INSERT INTO xxapp_user_pings
+            VALUES rec;
+        END IF;
+```
+
+Separate the DML from the `IF SQL%ROWCOUNT` check with a bare `--`.
+
+
+## 18. FETCH FIRST in Cursors
+
+For cursor FOR loops that should return limited rows, use `FETCH FIRST N ROWS ONLY`:
+
+```sql
+        FOR c IN (
+            SELECT
+                t.ping_id,
+                t.status,
+                t.message,
+                t.payload
+            FROM xxapp_user_pings t
+            WHERE t.user_id         = core.get_user_id()
+                AND t.delivered_at  IS NULL
+            ORDER BY
+                t.created_at
+            FETCH FIRST 1 ROWS ONLY
+        ) LOOP
+            -- body
+        END LOOP;
+```
+
+`FETCH FIRST` goes on its own line, aligned with `ORDER BY`.
+
+
+## 19. Right-Aligned Trailing Comments on Nested Expressions
+
+When a function call or expression is deeply nested, use right-aligned trailing comments to explain each nesting level:
+
+```sql
+        RETURN APEX_UTIL.PREPARE_URL(                                           -- add correct checksum
+            REGEXP_REPLACE(                                                     -- remove old checksum
+                REPLACE(in_payload, '&APP_SESSION.', core.get_session_id()),    -- replace session
+               '([&?])cs=[^&]+',
+               '\1', 1, 0, 'i'
+            )
+        );
+```
+
+Align the `--` comments at a consistent column position to form a visual column on the right side.
+
+
+## 20. Analytical Aggregates
+
+For advanced analytical functions like `KEEP (DENSE_RANK ...)`, keep them on the same line as the aggregate:
+
+```sql
+        SELECT MIN(t.next_interval) KEEP (DENSE_RANK FIRST ORDER BY t.created_at DESC)
+        INTO v_next_interval
+        FROM xxapp_user_pings t
+        WHERE t.user_id         = core.get_user_id();
 ```
 
 
@@ -639,3 +825,8 @@ When formatting PL/SQL code, verify:
 17. Assignments aligned when in sequence
 18. File ends with `END;` + `/` + blank line
 19. Prefixes: `in_`/`out_`/`io_` for params, `v_` local vars, `g_` globals, `c_` local constants, `rec` for rowtype
+20. `AUTHID DEFINER` or `AUTHID CURRENT_USER` with optional `RESETTABLE` on spec
+21. `SET ROW = rec` for whole-record UPDATE, `VALUES rec` for whole-record INSERT
+22. `SQL%ROWCOUNT` checks separated from DML by bare `--`
+23. `FETCH FIRST N ROWS ONLY` on its own line, aligned with `ORDER BY`
+24. Right-aligned trailing comments on nested expressions
