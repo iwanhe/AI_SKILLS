@@ -1,6 +1,6 @@
 ---
 name: adt-setup
-description: "ADT (APEX Deployment Tool) installation, configuration, updating, and database connection setup. Use this skill whenever a user needs to install ADT, set up prerequisites (Python, SQLcl, Instant Client, Git), configure shell environment, create or modify database connections, set up wallets for OCI, update oracledb/SQLcl/Instant Client, or troubleshoot any ADT setup issues. Triggers: install adt, setup adt, adt install, adt setup, configure adt, adt prerequisites, adt requirements, adt connection, connections.yaml, sample.yaml, adt wallet, adt thick, adt environment variables, .zshrc adt, adt.bat, update oracledb, upgrade sqlcl, update instant client, adt config -version, adt config -autoupdate, adt not found, pip upgrade adt."
+description: "ADT (APEX Deployment Tool) installation, project initialization, database connections, and dependency updates. Use this skill whenever a user needs to install ADT, set up prerequisites (Python, SQLcl, Instant Client, Git), configure shell environment, initialize a project repo with ADT config files, create or modify database connections, set up wallets for OCI, update oracledb/SQLcl/Instant Client, or troubleshoot any ADT setup issues. Triggers: install adt, setup adt, adt install, adt setup, configure adt, adt prerequisites, adt requirements, adt connection, connections.yaml, sample.yaml, adt wallet, adt thick, adt environment variables, .zshrc adt, adt.bat, init repo, initialize repo, new project, project setup, adt init, adt gitignore, update oracledb, upgrade sqlcl, update instant client, adt config -version, adt config -autoupdate, adt not found, pip upgrade adt."
 ---
 
 # ADT Setup Guide
@@ -34,13 +34,26 @@ Each covers download links, installation commands, PATH setup, environment varia
 
 ---
 
-## 2. Database Connections
+## 2. Initialize Project Repository
 
-Once ADT is installed and `adt config -version` works, the user needs to create a connection to their Oracle database.
+Before working with ADT in a project, the repo needs config templates and a proper `.gitignore`.
+
+Read `references/init-repo.md` for the full guide covering:
+
+- Locating the ADT installation
+- Copying `config.yaml` and `patch*` folders into the project's `config/` directory
+- Creating or updating `.gitignore` with ADT-specific patterns
+
+This step is also invoked automatically as part of section 3 (Database Connections), but it can be run independently — for example when setting up a repo before the database is available.
+
+---
+
+## 3. Database Connections
+
+Once ADT is installed and the project repo is initialized, the user needs to create a connection to their Oracle database.
 
 Read `references/connections.md` for the full guide covering:
 
-- Initializing the project config (copy `config.yaml`, `connections.yaml`, `patch*` folders from ADT repo)
 - Editing the sample connection file directly (do NOT use `adt config -create`)
 - Connection types: OCI cloud (wallet), on-premise (hostname/service), on-premise legacy (hostname/SID)
 - The `connections.yaml` file structure and all available fields
@@ -54,7 +67,7 @@ Read `references/connections.md` for the full guide covering:
 
 ---
 
-## 3. Updating Dependencies
+## 4. Updating Dependencies
 
 ADT depends on three external components that should be kept current: the Python **oracledb** module, **SQLcl**, and **Oracle Instant Client**.
 
