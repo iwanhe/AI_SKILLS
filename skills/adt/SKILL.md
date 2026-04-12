@@ -1,6 +1,6 @@
 ---
 name: adt
-description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL."
+description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, search APEX components, search Git history, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL, search apex, search repo, find object, object references, restore file, git history, live upload, static files, upload css, upload js, minify."
 ---
 
 # ADT (APEX Deployment Tool)
@@ -122,15 +122,60 @@ adt recompile -target DEV -type PACKAGE% -name XX%         # scope by type and n
 ```
 
 
-## Other Useful Commands
+### adt search_apex
 
-| Command | Purpose |
-|---|---|
-| `adt search_apex` | Search for objects within APEX by page, type, or name |
-| `adt search_repo` | Search Git history by commit, author, files, or branch |
-| `adt live_upload` | Upload files directly to APEX (live update during development) |
-| `adt deploy` | Deploy patches to environments |
-| `adt move` | Move or rename database objects |
+Search for database objects referenced by APEX applications. Parses the Embedded Code report to find which packages, views, tables, etc. are used on which pages and shared components. Requires `-embedded` export first.
+
+For full details on flags, output format, patch integration, and tips, read `references/search-apex.md`.
+
+**Quick reference:**
+
+```bash
+adt search_apex -app 100                                     # all referenced objects in app
+adt search_apex -app 100 -page 1 10                          # objects on specific pages
+adt search_apex -app 100 -name APP_% -type PACKAGE           # filter by name and type
+adt search_apex -app 100 -schema HR                          # precise matching via schema prefix
+adt search_apex -app 100 -patch TASK-123                     # copy refs to patch_scripts folder
+```
+
+**Prerequisite:** run `adt export_apex -app {ID} -only -embedded` first to generate the embedded code report.
+
+
+### adt search_repo
+
+Search Git commit history for database objects — by commit message, file name, object type, object name, author, or date range. Also supports restoring previous file versions.
+
+For full details on flags, restore behavior, and tips, read `references/search-repo.md`.
+
+**Quick reference:**
+
+```bash
+adt search_repo -summary TASK-123                            # find commits by message
+adt search_repo -file MY_PACKAGE                             # find file (even deleted ones)
+adt search_repo -type VIEW -recent 30                        # view changes in last 30 days
+adt search_repo -name APP_CORE% -my                          # my changes to matching objects
+adt search_repo -file MY_PACKAGE -restore                    # restore historical versions
+adt search_repo -file MY_PACKAGE -restore -stage             # restore as staged git commits
+```
+
+**Prerequisite:** commit index must exist — run `adt patch -target {ENV} -rebuild` if missing.
+
+
+### adt live_upload
+
+Monitor a local folder and automatically upload changed JS, CSS, and other static files to APEX. Includes automatic minification. Runs in a continuous loop until Ctrl+C.
+
+For full details on flags, minification, monitored directories, and tips, read `references/live-upload.md`.
+
+**Quick reference:**
+
+```bash
+adt live_upload                                              # monitor with defaults from config
+adt live_upload -app 100                                     # monitor a specific app's files
+adt live_upload -app 100 -folder ./my_static/                # custom folder
+adt live_upload -workspace                                   # workspace files instead of app files
+adt live_upload -show                                        # list monitored files at startup
+```
 
 
 ## Typical Developer Workflow with ADT
