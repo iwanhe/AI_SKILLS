@@ -31,6 +31,8 @@ skills/
 | [adt-setup](skills/adt-setup/) | install-mac, install-windows, init-repo, connections, update-oracledb, update-sqlcl, update-instant-client | Installation, project init, database connections, dependency updates |
 | [deployment](skills/deployment/) | process | Deployment process and standards |
 
+The `adt` and `adt-setup` skills are complementary. `adt` covers the day-to-day CLI commands (exporting, patching, searching), while `adt-setup` handles everything before that — installing ADT and its prerequisites on Mac or Windows, initializing a new project repo with config templates and `.gitignore` patterns (`init-repo`), creating database connections with wallet/thick/thin modes, and keeping dependencies like oracledb, SQLcl, and Instant Client up to date. The split keeps the daily-use skill lean and avoids loading install/setup content that's only needed once per machine or project.
+
 ### Oracle APEX & PL/SQL
 
 | Skill | Type | Description |
