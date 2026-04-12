@@ -1,11 +1,13 @@
 ---
 name: adt-setup
-description: "ADT (APEX Deployment Tool) installation, configuration, updating, and database connection setup. Use this skill whenever a user needs to install ADT, set up prerequisites (Python, SQLcl, Instant Client, Git), configure shell environment, create or modify database connections, set up wallets for OCI, update oracledb/SQLcl/Instant Client, or troubleshoot any ADT setup issues. Triggers: install adt, setup adt, adt install, adt setup, configure adt, adt prerequisites, adt requirements, adt connection, adt config -create, connections.yaml, adt wallet, adt thick, adt environment variables, .zshrc adt, update oracledb, upgrade sqlcl, update instant client, adt config -version, adt config -autoupdate, adt not found, pip upgrade adt."
+description: "ADT (APEX Deployment Tool) installation, configuration, updating, and database connection setup. Use this skill whenever a user needs to install ADT, set up prerequisites (Python, SQLcl, Instant Client, Git), configure shell environment, create or modify database connections, set up wallets for OCI, update oracledb/SQLcl/Instant Client, or troubleshoot any ADT setup issues. Triggers: install adt, setup adt, adt install, adt setup, configure adt, adt prerequisites, adt requirements, adt connection, connections.yaml, sample.yaml, adt wallet, adt thick, adt environment variables, .zshrc adt, adt.bat, update oracledb, upgrade sqlcl, update instant client, adt config -version, adt config -autoupdate, adt not found, pip upgrade adt."
 ---
 
 # ADT Setup Guide
 
 This skill covers three aspects of ADT (APEX Deployment Tool) setup: **installing** it from scratch, **creating database connections**, and **updating** its dependencies. Read the appropriate section based on what the user needs.
+
+**Rule:** After completing any install or update operation, always run `adt config -version` and show the output to the user so they can see the current versions of all components.
 
 ---
 
@@ -38,13 +40,17 @@ Once ADT is installed and `adt config -version` works, the user needs to create 
 
 Read `references/connections.md` for the full guide covering:
 
+- Initializing the project config (copy `config.yaml`, `connections.yaml`, `patch*` folders from ADT repo)
+- Editing the sample connection file directly (do NOT use `adt config -create`)
 - Connection types: OCI cloud (wallet), on-premise (hostname/service), on-premise legacy (hostname/SID)
-- The `adt config -create` command and all its flags
-- The `connections.yaml` file structure and how to edit it manually
+- The `connections.yaml` file structure and all available fields
+- Connection file naming — centralized files must match the project folder name exactly
 - Multi-schema setups, default schemas, export filters
 - Password encryption with `ADT_KEY`
 - Wallet configuration for OCI databases
 - Thick vs thin connection modes
+
+**Important:** Connection setup must always be done from within the project repository. The `config/connections.yaml` filename and location are critical to ADT.
 
 ---
 
