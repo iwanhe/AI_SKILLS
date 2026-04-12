@@ -1,6 +1,6 @@
 ---
 name: adt
-description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, configure ADT connections, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, adt config, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL."
+description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL."
 ---
 
 # ADT (APEX Deployment Tool)
@@ -15,245 +15,96 @@ ADT is invoked via a shell alias: `adt {command} {arguments}`.
 
 ### adt export_db
 
-Export database objects into the repository folder structure.
+Export database objects into the repository folder structure. Each object becomes a clean `.sql` file organized by type. Filters by time (`-recent`), object type (`-type`), and object name (`-name`) can be combined.
 
-**Common usage:**
+For full details on flags, output structure, cleanup behavior, and edge cases, read `references/export-db.md`.
+
+**Quick reference:**
 
 ```bash
-# Export objects changed in the last 7 days
-adt export_db -recent 7
-
-# Export specific object types
-adt export_db -type PACKAGE% -type VIEW%
-
-# Export specific objects by name
-adt export_db -name MY_PACKAGE -name MY_VIEW
-
-# Export from a specific schema
-adt export_db -schema HR
-
-# Delete existing folders before export (clean export)
-adt export_db -recent 7 -delete
+adt export_db -recent 7                                    # objects changed in last 7 days
+adt export_db -type PACKAGE% VIEW%                         # specific object types
+adt export_db -name APP_% -recent 7                        # combine name + time filters
+adt export_db -type JOB                                    # jobs (no -recent — jobs lack timestamp)
+adt export_db -recent 7 -delete                            # clean export (delete folders first)
 ```
 
-**Key flags:**
+**Critical:** JOB objects have no `last_ddl_time` — never combine `-type JOB` with `-recent`. Export jobs separately without the `-recent` flag.
 
-| Flag | Purpose |
-|---|---|
-| `-recent {days}` | Objects changed in the last N days |
-| `-type {OBJECT_TYPE%}` | Filter by object type (LIKE syntax, repeatable) |
-| `-name {OBJECT_NAME%}` | Filter by object name (LIKE syntax, repeatable) |
-| `-schema {SCHEMA_NAME}` | Target schema (`%` for all) |
-| `-env {ENVIRONMENT}` | Source environment for connection overrides |
-| `-key {PASSWORD}` | Decryption key for encrypted passwords |
-| `-delete` | Delete existing folders before export |
-
-**Output structure:**
-
-```
-database_{schema}/{object_type}/    # objects organized by type
-database_{schema}/data/             # exported data files
-database_{schema}/unit_tests/       # unit test packages
-database/grants_made/{schema}.sql
-database/grants_received/{schema}.sql
-```
-
-**Supported object types:** Tables, Views, Indexes, Sequences, Synonyms, Packages, Procedures, Functions, Triggers, Types, Materialized Views, Jobs, Grants, Roles, Directories.
+**Rule:** Always show the user the full console output from this command (overview table, deleted objects, export progress).
 
 
 ### adt export_apex
 
-Export APEX applications, components, REST services, and workspace files.
+Export APEX applications, components, REST services, and workspace files. Supports multiple export formats, scoping by app/workspace/group, and filtering by recent changes or developer.
 
-**Common usage:**
+For full details on flags, formats, workflows, and troubleshooting, read `references/export-apex.md`.
+
+**Quick reference:**
 
 ```bash
-# Export everything for all apps
-adt export_apex -all
-
-# Export split + readable + embedded for a specific app
-adt export_apex -split -readable -embedded -app 100
-
-# Export only recently changed components
-adt export_apex -split -readable -embedded -recent 7
-
-# Export REST services
-adt export_apex -rest
-
-# Export by developer
-adt export_apex -split -readable -embedded -by JKVETINA
+adt export_apex -app 100 -only -full -split -files -rest -readable -recent 0   # typical export
+adt export_apex -app 100 200 -only -split -readable -recent 3                  # multiple apps, recent changes
+adt export_apex -reveal                                                         # list available apps
+adt export_apex -reveal -schema APPS                                            # list apps for a different schema
 ```
 
-**Key flags:**
+**Rules:**
+- Always pass `-only` to override config defaults — explicitly control which formats are exported.
+- Always pass `-recent 0` unless the user asks to see recently changed components. Note: `-recent` only controls whether a list of changes is shown — the export itself always exports all components.
+- Typical formats: `-full -split -files -files_ws -rest -readable`. Skip `-embedded` unless explicitly asked (it slows exports).
+- If apps don't show up, the schema in `connections.yaml` likely doesn't match the app owner — try `-schema`.
 
-| Flag | Purpose |
-|---|---|
-| `-full` | Full monolithic application export |
-| `-split` | Split export (individual components/pages) |
-| `-readable` | Human-readable export format |
-| `-embedded` | Embedded Code report |
-| `-rest` | REST services and modules |
-| `-files` | Application binary files |
-| `-files_ws` | Workspace binary files |
-| `-all` | Export everything |
-| `-recent {days}` | Components changed in the last N days |
-| `-by {DEVELOPER}` | Filter by developer |
-| `-app {APP_ID}` | Limit to specific application(s) (repeatable) |
-| `-ws {WORKSPACE}` | Limit to workspace |
-| `-group {GROUP}` | Limit to application group |
-| `-release {VERSION}` | Tag export with a release version |
-
-**Output structure:**
-
-```
-apex/{workspace}/{app_group}/{app_owner}/{app_id}_{app_alias}/
-apex/{workspace}/rest/
-apex/{workspace}/workspace_files/
-```
-
-**Export types explained:**
-
-- **Full export** — single monolithic SQL file per application, used for full application import.
-- **Split export** — individual files for each page, component, and shared component. This is what gets committed and diffed in Git.
-- **Readable export** — YAML/JSON formatted export for human review and code search.
-- **Embedded Code report** — extracts all PL/SQL and JavaScript embedded in APEX components into a single reviewable file.
+**Rule:** Always show the user the full console output from this command.
 
 
 ### adt export_data
 
-Export table data into CSV files with auto-generated SQL MERGE statements.
+Export table data (seed data, LOV tables, configuration) into CSV files with auto-generated SQL MERGE statements. Designed for reference data, not sensitive or transactional data.
 
-**Common usage:**
+For full details on flags, output format, limitations, and NLS considerations, read `references/export-data.md`.
+
+**Quick reference:**
 
 ```bash
-# Export specific table data
-adt export_data -name CONFIG_PARAMETERS
-
-# Export multiple tables matching a pattern
-adt export_data -name CONFIG%
-
-# Export from a specific schema
-adt export_data -name LOOKUP% -schema HR
+adt export_data -name CONFIG_PARAMETERS LOV_STATUS        # specific tables
+adt export_data -name CONFIG% LOV_%                        # wildcard patterns
+adt export_data                                            # re-export all previously exported tables
 ```
 
-**Key flags:**
+**Limitations:** BLOB, CLOB, XMLTYPE, JSON columns are not exported. Audit columns (CREATED_BY, CREATED_AT, etc.) are skipped per config. Set correct NLS date formats on target environments before running the generated `.sql` files.
 
-| Flag | Purpose |
-|---|---|
-| `-name {TABLE_NAME%}` | Table(s) to export (LIKE syntax, repeatable) |
-| `-schema {SCHEMA_NAME}` | Target schema |
-| `-env {ENVIRONMENT}` | Source environment |
-| `-key {PASSWORD}` | Decryption key |
-
-**Output:**
-
-```
-database_{schema}/data/{table_name}.csv   # raw data
-database_{schema}/data/{table_name}.sql   # generated MERGE statements
-```
-
-The generated SQL MERGE statements handle INSERT and UPDATE by default. DELETE generation is disabled by default and can be enabled in config.
+**Rule:** Always show the user the full console output from this command.
 
 
 ### adt patch
 
-Create and deploy patch files from Git commits. This is the most powerful command — it reads your commits, resolves dependencies, orders objects correctly, and generates deployment scripts.
+Create and deploy patch files from Git commits. The most powerful ADT command — reads commits, resolves dependencies, orders objects, and generates deployment scripts.
 
-**Common usage:**
+For full details on all flags, patch templates/scripts, object ordering, output structure, and known limitations, read `references/patch.md`.
 
-```bash
-# Create a patch for a specific task
-adt patch -patch TASK-123 -create
-
-# Create and deploy immediately
-adt patch -patch TASK-123 -create -deploy
-
-# Show recent commits to select from
-adt patch -commits 20
-
-# Show only my commits
-adt patch -commits 20 -my
-
-# Create patch from specific commits
-adt patch -patch TASK-123 -commit abc1234 def5678 -create
-
-# Deploy to a specific environment
-adt patch -patch TASK-123 -create -deploy -target UAT
-
-# Force redeployment
-adt patch -patch TASK-123 -deploy -force
-```
-
-**Key flags:**
-
-| Flag | Purpose |
-|---|---|
-| `-patch {CARD_NUMBER}` | Patch code/name (typically the task ID) |
-| `-ref {NUMBER}` | Patch reference number |
-| `-create` | Create patch file(s) |
-| `-deploy` | Deploy immediately after creation |
-| `-force` | Force redeployment |
-| `-continue` | Continue on DB error instead of rollback |
-| `-commits {NUMBER}` | Show N recent commits |
-| `-my` | Show only your commits |
-| `-by {AUTHOR}` | Show commits by specific author |
-| `-commit {HASH(ES)}` | Process specific commit(s) |
-| `-ignore {HASH(ES)}` | Exclude specific commit(s) |
-| `-target {ENVIRONMENT}` | Target deployment environment |
-| `-branch {BRANCH_NAME}` | Override active Git branch |
-| `-full {APP_ID(S)}` | Use full export for specific APEX apps |
-| `-local` | Use local files instead of Git versions |
-
-**Automatic object ordering:**
-
-ADT resolves dependencies and orders objects in this sequence:
-Sequences > Tables > Types > Synonyms > Objects (Views/PL-SQL) > Triggers > Materialized Views > Indexes > Data > Grants > Jobs
-
-**Patch templates and scripts:**
-
-- `config/patch_template/{GROUP}_before/` — executed before an object type group
-- `config/patch_template/{GROUP}_after/` — executed after an object type group
-- `config/patch_scripts/{CARD_NUMBER}/` — custom scripts for a specific patch
-
-**Output:**
-
-```
-patch/{date}.{seq}.{patch_code}/              # patch files
-patch/{date}.{seq}.{patch_code}/LOGS_{env}/   # deployment logs
-snapshots/                                     # file snapshots
-```
-
-
-## Configuration
-
-### adt config
-
-Manage database connections and project settings.
+**Quick reference:**
 
 ```bash
-# Interactive setup
-adt config
-
-# Create new connection(s)
-adt config -create
-
-# Create with encrypted passwords
-adt config -create -key MySecretKey
-
-# Check component versions
-adt config -version
+adt patch -target UAT -patch TASK_ID                          # preview matching commits
+adt patch -target UAT -patch TASK_ID -create                  # create the patch
+adt patch -target UAT -patch TASK_ID -create -deploy          # create and deploy
+adt patch -target UAT -patch TASK_ID -deploy -force           # force redeploy
+adt patch -target UAT -commits 50 -my                         # browse my recent commits
+adt patch -target UAT -patch TASK_ID -commit 1-20 -ignore 5   # cherry-pick commits
+adt patch -target UAT -patch TASK_ID -head                    # use HEAD file versions
+adt patch -target UAT -patch TASK_ID -local                   # use local (uncommitted) files
+adt patch -target UAT -patch TASK_ID -create -full            # full APEX export in patch
 ```
 
-**Config files:**
+**Key concepts:**
+- Commit filtering: `-commit`, `-ignore` (support ranges like `1-20`), `-search`, `-my`, `-by`
+- File sources: default (from matching commit), `-head` (latest commit), `-local` (working tree)
+- Templates (`config/patch_template/`) apply to every patch; scripts (`config/patch_scripts/{CARD}/`) apply to one patch
+- Object ordering follows `patch_map` in `config.yaml`: Sequences → Tables → Types → … → Jobs
 
-| File | Purpose |
-|---|---|
-| `config/connections.yaml` | Database connections |
-| `config/config.yaml` | Project-wide settings |
-| `config/config_{SCHEMA}.yaml` | Schema-specific overrides |
-| `config/config_{SCHEMA}_{ENV}.yaml` | Environment + schema overrides |
 
-**Password encryption:** Passwords can be encrypted with a key passed via `-key` flag or the `ADT_KEY` environment variable. Encrypted connection files are safe to commit to the repository.
+## Other Core Commands
 
 
 ### adt recompile
