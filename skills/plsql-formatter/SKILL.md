@@ -1,5 +1,5 @@
 ---
-name: plsql-format
+name: plsql-formatter
 description: "PL/SQL code formatting and style guide for Oracle packages, procedures, functions, and SQL statements. Use this skill whenever creating, editing, reformatting, or reviewing PL/SQL code (.sql, .pks, .pkb files). Triggers: PL/SQL, Oracle package, stored procedure, SQL formatting, package body, package spec, reformat SQL, code style Oracle."
 ---
 
