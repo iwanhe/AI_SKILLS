@@ -28,8 +28,7 @@ skills/
 | Skill | Type | Description |
 |---|---|---|
 | [adt](skills/adt/) | Single file | ADT CLI commands: export_db, export_apex, export_data, patch, config, and developer workflow |
-| [adt-install](skills/adt-install/) | Folder | ADT installation and setup guide with Mac and Windows references |
-| [adt-update](skills/adt-update/) | Folder | Updating ADT dependencies: oracledb, SQLcl, Oracle Instant Client |
+| [adt-setup](skills/adt-setup/) | Folder | ADT installation, database connections, and dependency updates (Mac/Windows) |
 | [apex-qa](skills/apex-qa/) | Single file | APEX application quality assurance, page design, component naming, MVC |
 | [apex-rest](skills/apex-rest/) | Single file | APEX RESTful data services, ORDS modules, REST handlers |
 | [data-model](skills/data-model/) | Single file | Oracle data model design: tables, columns, constraints, indexes |

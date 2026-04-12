@@ -11,6 +11,16 @@ SKILLS_DST="$HOME/.claude/skills"
 
 mkdir -p "$SKILLS_DST"
 
+# Remove stale symlinks (pointing to deleted or moved skill folders)
+for link in "$SKILLS_DST"/*/; do
+    link="${link%/}"
+    if [ -L "$link" ] && [ ! -e "$link" ]; then
+        echo "  removed stale: $(basename "$link")"
+        rm "$link"
+    fi
+done
+
+# Create symlinks for current skills
 for skill_dir in "$SKILLS_SRC"/*/; do
     skill_name=$(basename "$skill_dir")
     if [ -f "$skill_dir/SKILL.md" ]; then
