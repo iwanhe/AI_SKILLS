@@ -1,6 +1,6 @@
 ---
 name: adt
-description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, configure ADT connections, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, adt config, apex ci/cd, database export, patch creation, installation script, deployment order."
+description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, configure ADT connections, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, adt config, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL."
 ---
 
 # ADT (APEX Deployment Tool)
@@ -256,11 +256,25 @@ adt config -version
 **Password encryption:** Passwords can be encrypted with a key passed via `-key` flag or the `ADT_KEY` environment variable. Encrypted connection files are safe to commit to the repository.
 
 
+### adt recompile
+
+Recompile invalid database objects. Supports forced recompilation with PL/SQL compilation flags (native/interpreted, optimization level, PL/Scope, warnings). Handles dependency-aware retry logic automatically.
+
+For full details on flags, behavior, and use cases, read `references/recompile.md`.
+
+**Quick reference:**
+
+```bash
+adt recompile -target DEV                                  # recompile invalid objects
+adt recompile -target DEV -force -native -level 3          # force recompile all with native + optimization
+adt recompile -target DEV -type PACKAGE% -name XX%         # scope by type and name
+```
+
+
 ## Other Useful Commands
 
 | Command | Purpose |
 |---|---|
-| `adt recompile` | Recompile invalid database objects |
 | `adt search_apex` | Search for objects within APEX by page, type, or name |
 | `adt search_repo` | Search Git history by commit, author, files, or branch |
 | `adt live_upload` | Upload files directly to APEX (live update during development) |
