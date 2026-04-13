@@ -5,7 +5,7 @@ description: "Oracle APEX application quality assurance — standards for page d
 
 # Oracle APEX Quality Assurance
 
-This skill defines quality standards for Oracle APEX applications. It covers the MVC pattern, page design rules, component naming conventions, shared component usage, and automated checks. It does not cover PL/SQL formatting or code quality — those belong to the `plsql-format` and `plsql-code-quality` skills respectively.
+This skill defines quality standards for Oracle APEX applications. It covers the MVC pattern, page design rules, component naming conventions, shared component usage, and automated checks. It does not cover PL/SQL formatting or code quality — those belong to the `plsql-formatter` and `plsql-code-quality` skills respectively.
 
 The goal is to keep APEX applications maintainable, consistent, and debuggable. Most of the rules below exist because violating them creates problems that are invisible until production — missing auth schemes, scattered inline SQL, unnamed components that nobody can trace.
 

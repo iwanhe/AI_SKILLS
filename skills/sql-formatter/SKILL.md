@@ -5,9 +5,9 @@ description: "SQL formatting and style guide for Oracle views, tables, triggers,
 
 # SQL Formatter — Views, DDL & Standalone SQL
 
-This skill defines formatting rules extracted from a production Oracle codebase. It covers views, tables, triggers, sequences, grants, MERGE/data loading scripts, and standalone SQL statements. For PL/SQL packages (procedures, functions, package bodies/specs), use the `plsql-format` skill instead — this skill focuses on the SQL side.
+This skill defines formatting rules extracted from a production Oracle codebase. It covers views, tables, triggers, sequences, grants, MERGE/data loading scripts, and standalone SQL statements. For PL/SQL packages (procedures, functions, package bodies/specs), use the `plsql-formatter` skill instead — this skill focuses on the SQL side.
 
-**These rules also apply to SQL statements embedded inside PL/SQL code** (SELECT, INSERT, UPDATE, DELETE, MERGE inside packages, procedures, functions, triggers). When SQL appears inside PL/SQL, apply all the formatting rules below but shift the entire statement to match the PL/SQL indentation context. The SQL's internal structure (column alignment, WHERE operators, JOIN conditions, CASE layout, `--` separators) stays exactly the same relative to its own `SELECT`/`FROM`/`WHERE` keywords — only the base indent changes. See `plsql-format` §6 for examples of this embedding.
+**These rules also apply to SQL statements embedded inside PL/SQL code** (SELECT, INSERT, UPDATE, DELETE, MERGE inside packages, procedures, functions, triggers). When SQL appears inside PL/SQL, apply all the formatting rules below but shift the entire statement to match the PL/SQL indentation context. The SQL's internal structure (column alignment, WHERE operators, JOIN conditions, CASE layout, `--` separators) stays exactly the same relative to its own `SELECT`/`FROM`/`WHERE` keywords — only the base indent changes. See `plsql-formatter` §6 for examples of this embedding.
 
 The style favors **vertical alignment**, **generous whitespace**, and **lowercase identifiers** with **uppercase keywords**. Every file should be scannable at a glance — a developer should immediately see the query structure, logical groupings, and data flow through CTEs.
 
@@ -617,8 +617,8 @@ Key patterns:
 - `CREATE OR REPLACE TRIGGER` on one line with trigger name
 - Timing/event (`AFTER DDL ON SCHEMA`, `BEFORE CREATE ON SCHEMA`) on next line
 - `DECLARE`/`BEGIN`/`EXCEPTION`/`END` at base indent level
-- Body indented 4 spaces, follows plsql-format rules for comments and code blocks
-- Named parameter calls with `=>` alignment (same as plsql-format)
+- Body indented 4 spaces, follows plsql-formatter rules for comments and code blocks
+- Named parameter calls with `=>` alignment (same as plsql-formatter)
 - File terminates with `/` on its own line
 
 

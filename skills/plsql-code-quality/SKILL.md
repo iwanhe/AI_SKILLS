@@ -5,7 +5,7 @@ description: "PL/SQL code quality guide covering naming conventions, anti-patter
 
 # PL/SQL Code Quality Guide
 
-This skill covers naming conventions, anti-patterns, and structural patterns for Oracle PL/SQL. It does not cover formatting (indentation, alignment, whitespace) — that belongs to the `plsql-format` skill.
+This skill covers naming conventions, anti-patterns, and structural patterns for Oracle PL/SQL. It does not cover formatting (indentation, alignment, whitespace) — that belongs to the `plsql-formatter` skill.
 
 The philosophy here is to trust the developer. These are guardrails, not handcuffs. Every rule has a reason, and when the reason doesn't apply, the developer can override it — as long as they leave a comment explaining why.
 
@@ -391,4 +391,4 @@ When reviewing PL/SQL, check for:
 
 **Structure**: no inline SELECT over ~100 lines (should be a `_v` view), procedures under 200 lines, package under 10,000 lines, records used for large INSERT/UPDATE, logic lives in the database not the application layer, no duplicated SQL/logic blocks, one compound trigger per table (not multiple individual triggers), APEX page logic in dedicated `_p{page}` packages.
 
-**Comments**: `-- WHY:` on any workaround or intentional rule violation, `-- VERIFY:` on uncertain code, subprogram summaries present (per the `plsql-format` skill).
+**Comments**: `-- WHY:` on any workaround or intentional rule violation, `-- VERIFY:` on uncertain code, subprogram summaries present (per the `plsql-formatter` skill).

@@ -6,7 +6,7 @@ A collection of reusable AI skills for Claude, designed to be plugged into vario
 
 Skills use two structural patterns depending on their nature:
 
-**Single file (`SKILL.md` only)** — for skills where all content is always relevant together. If someone triggers the skill, they need the whole thing. Style guides that apply as a unit, compact command references. Examples: `plsql-format`, `data-model`, `apex-qa`, `apex-rest`.
+**Single file (`SKILL.md` only)** — for skills where all content is always relevant together. If someone triggers the skill, they need the whole thing. Style guides that apply as a unit, compact command references. Examples: `plsql-formatter`, `data-model`, `apex-qa`, `apex-rest`.
 
 **Folder with references** — for skills that are situational or cover multiple sub-topics. The main `SKILL.md` stays lean (quick reference + key concepts) and routes to the appropriate reference file based on context. This avoids loading 200 lines of Mac-specific install steps when the user is on Windows, or the full patch flag table when the user just needs to export. Examples: `adt` (8 command references), `adt-setup` (platform + component references), `deployment`.
 
@@ -40,7 +40,7 @@ The `adt` and `adt-setup` skills are complementary. `adt` covers the day-to-day 
 | [apex-qa](skills/apex-qa/) | Single file | APEX application quality assurance, page design, component naming, MVC |
 | [apex-rest](skills/apex-rest/) | Single file | APEX RESTful data services, ORDS modules, REST handlers |
 | [data-model](skills/data-model/) | Single file | Oracle data model design: tables, columns, constraints, indexes |
-| [plsql-format](skills/plsql-format/) | Single file | PL/SQL formatting and style guide |
+| [plsql-formatter](skills/plsql-formatter/) | Single file | PL/SQL formatting and style guide |
 | [plsql-code-quality](skills/plsql-code-quality/) | Single file | PL/SQL code quality checks and anti-patterns |
 | [sql-formatter](skills/sql-formatter/) | Single file | SQL statement formatting |
 

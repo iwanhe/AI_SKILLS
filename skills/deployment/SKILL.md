@@ -79,7 +79,7 @@ Only Todo, In Progress, In Review, and Done are visible on the board. Swimlanes 
 
 - `adt` — ADT command reference and flags
 - `apex-qa` — APEX application quality standards
-- `plsql-format` — PL/SQL formatting standards
+- `plsql-formatter` — PL/SQL formatting standards
 - `plsql-code-quality` — PL/SQL code quality guidelines
 - `data-model` — Database design standards
 - `apex-rest` — REST service standards
