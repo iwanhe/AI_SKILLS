@@ -15,38 +15,37 @@ Rule of thumb: if content is always needed together, keep it in one file. If it'
 ## Repository Structure
 
 ```
-skills/
+<CATEGORY>/
   <skill-name>/
     SKILL.md              -- Core skill definition (required)
     references/           -- Optional: detailed guides loaded on demand
 ```
 
-## Available Skills
+Skills are organized into categories (top-level folders). More categories will be added over time.
 
-### ADT (APEX Deployment Tool)
+## Categories
+
+### DEVOPS
+
+Skills for Oracle APEX development, PL/SQL, deployment, and tooling.
+
+#### ADT (APEX Deployment Tool)
 
 | Skill | References | Description |
 |---|---|---|
-| [adt](skills/adt/) | export-db, export-apex, export-data, patch, recompile, search-apex, search-repo, live-upload | ADT CLI commands, developer workflow, export/patch/search/deploy operations |
-| [adt-setup](skills/adt-setup/) | install-mac, install-windows, init-repo, connections, update-oracledb, update-sqlcl, update-instant-client | Installation, project init, database connections, dependency updates |
-| [deployment](skills/deployment/) | process | Deployment process and standards |
+| [adt](DEVOPS/adt/) | export-db, export-apex, export-data, patch, recompile, search-apex, search-repo, live-upload | ADT CLI commands, developer workflow, export/patch/search/deploy operations |
+| [adt-setup](DEVOPS/adt-setup/) | install-mac, install-windows, init-repo, connections, update-oracledb, update-sqlcl, update-instant-client | Installation, project init, database connections, dependency updates |
+| [deployment](DEVOPS/deployment/) | process | Deployment process and standards |
 
 The `adt` and `adt-setup` skills are complementary. `adt` covers the day-to-day CLI commands (exporting, patching, searching), while `adt-setup` handles everything before that — installing ADT and its prerequisites on Mac or Windows, initializing a new project repo with config templates and `.gitignore` patterns (`init-repo`), creating database connections with wallet/thick/thin modes, and keeping dependencies like oracledb, SQLcl, and Instant Client up to date. The split keeps the daily-use skill lean and avoids loading install/setup content that's only needed once per machine or project.
 
-### Oracle APEX & PL/SQL
+#### Oracle APEX & PL/SQL
 
 | Skill | Type | Description |
 |---|---|---|
-| [apex-qa](skills/apex-qa/) | Single file | APEX application quality assurance, page design, component naming, MVC |
-| [apex-rest](skills/apex-rest/) | Single file | APEX RESTful data services, ORDS modules, REST handlers |
-| [data-model](skills/data-model/) | Single file | Oracle data model design: tables, columns, constraints, indexes |
-| [plsql-formatter](skills/plsql-formatter/) | Single file | PL/SQL formatting and style guide |
-| [plsql-code-quality](skills/plsql-code-quality/) | Single file | PL/SQL code quality checks and anti-patterns |
-| [sql-formatter](skills/sql-formatter/) | Single file | SQL statement formatting |
-
-## Adding a New Skill
-
-1. Create a folder under `skills/` with a descriptive kebab-case name.
-2. Add a `SKILL.md` with the core rules, patterns, and examples.
-3. If the skill has sub-variants or exceeds ~150 lines, add a `references/` folder with separate files and route to them from `SKILL.md`.
-4. Update this README with the new skill.
+| [apex-qa](DEVOPS/apex-qa/) | Single file | APEX application quality assurance, page design, component naming, MVC |
+| [apex-rest](DEVOPS/apex-rest/) | Single file | APEX RESTful data services, ORDS modules, REST handlers |
+| [data-model](DEVOPS/data-model/) | Single file | Oracle data model design: tables, columns, constraints, indexes |
+| [plsql-formatter](DEVOPS/plsql-formatter/) | Single file | PL/SQL formatting and style guide |
+| [plsql-code-quality](DEVOPS/plsql-code-quality/) | Single file | PL/SQL code quality checks and anti-patterns |
+| [sql-formatter](DEVOPS/sql-formatter/) | Single file | SQL statement formatting |
