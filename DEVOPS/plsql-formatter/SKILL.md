@@ -1,11 +1,35 @@
 ---
 name: plsql-formatter
-description: "PL/SQL code formatting and style guide for Oracle packages, procedures, functions, and SQL statements. Use this skill whenever creating, editing, reformatting, or reviewing PL/SQL code (.sql, .pks, .pkb files). Triggers: PL/SQL, Oracle package, stored procedure, SQL formatting, package body, package spec, reformat SQL, code style Oracle."
+description: "Formatting style guide for Oracle PL/SQL code: packages, procedures, functions, package bodies, package specs, anonymous blocks, and any SQL embedded inside PL/SQL. Use this skill when a file contains CREATE OR REPLACE PACKAGE, CREATE OR REPLACE PROCEDURE, CREATE OR REPLACE FUNCTION, CREATE OR REPLACE TRIGGER body, or a DECLARE/BEGIN block. For pure DDL (views, tables, sequences, grants, standalone SELECT/MERGE) use sql-formatter instead. Triggers: PL/SQL, package body, package spec, stored procedure, stored function, anonymous block, reformat package, .pks, .pkb."
+version: "1.0.0"
+tags: [oracle, plsql, formatting, code-style]
+license: MIT
 ---
-
 # PL/SQL Formatting & Style Guide
 
 This skill defines formatting rules extracted from a production Oracle PL/SQL codebase. Apply these rules when writing, editing, or reformatting any PL/SQL code to ensure visual consistency and readability.
+
+> **About the examples.** Code samples in this guide use real identifiers from the source codebase (`core_lock`, `core_locks`, `xxapp_applications`, `core.raise_error`, etc.). The rules themselves are general — substitute your own names. APEX-specific patterns are flagged as such with a `(APEX-specific)` marker.
+
+> **This is a guideline applied by an LLM, not a CLI binary.** The skill ships a style guide; Claude (or another model that loads it) applies the rules while editing code. There is no `plsql-formatter --in foo.sql --out bar.sql` executable. To enforce the rules in CI, pair this skill with a linter you control.
+
+## How to invoke
+
+Auto-loads when Claude is editing a file matching the triggers in the frontmatter. Manual invoke: `/plsql-formatter` followed by the file path or pasted code.
+
+## Skill output contract
+
+When asked to **format** or **review** code, produce two sections:
+
+1. **Violations** — a list of rule breaches with `§N` section references and line numbers. Skip this section if the input is already clean.
+2. **Reformatted code** — the input rewritten according to every rule in this guide. Preserve every comment, every literal value, every executable behaviour. Formatting only, never logic.
+
+When asked to review only, skip the second section. When asked to format only, skip the first. If a rule is genuinely ambiguous on a given input, flag it under Violations rather than guessing.
+
+## Maintenance note (cross-skill)
+
+Sections **§1 Case Conventions**, **§2 Indentation**, and **§13 Trailing Whitespace** are mirrored in the `sql-formatter` skill. When changing any of these three rules here, change them in `sql-formatter` too — they must stay in lock-step, otherwise SQL embedded inside PL/SQL will format inconsistently with standalone SQL.
+
 
 ## General Principles
 
@@ -92,6 +116,26 @@ Rules for parameter alignment:
 - Use `in_` prefix for IN parameters, `out_` for OUT, `io_` for IN OUT.
 - Prefer `%TYPE` and `%ROWTYPE` anchored types over hard-coded types when referencing table columns.
 
+**Counter-example:**
+
+```sql
+-- BAD: types and defaults float, no column structure
+PROCEDURE create_lock (
+    in_object_owner core_locks.object_owner%TYPE,
+    in_object_type core_locks.object_type%TYPE,
+    in_locked_by core_locks.locked_by%TYPE := NULL,
+    in_hash_check BOOLEAN := TRUE
+);
+
+-- GOOD: name, type, and default each in their own aligned column
+PROCEDURE create_lock (
+    in_object_owner     core_locks.object_owner%TYPE,
+    in_object_type      core_locks.object_type%TYPE,
+    in_locked_by        core_locks.locked_by%TYPE       := NULL,
+    in_hash_check       BOOLEAN                         := TRUE
+);
+```
+
 
 ## 4. Constant and Variable Declarations
 
@@ -123,7 +167,7 @@ Naming conventions for variables:
 - `out_` prefix for variables holding output/return values.
 - `rec` for `%ROWTYPE` record variables (no prefix needed).
 - `in_`, `out_`, `io_` prefixes for parameters.
-- `p_` prefix for parameters in APEX callback functions (e.g., `p_username`, `p_password` in authentication functions) — use this only when the APEX API signature requires it.
+- `p_` prefix for parameters in APEX callback functions (e.g., `p_username`, `p_password` in authentication functions) — **(APEX-specific)** use this only when the APEX API signature requires it.
 
 
 ## 5. Blank Lines and Section Separators
@@ -232,20 +276,7 @@ Inside a cursor FOR loop (which adds another nesting level), the SQL base shifts
 
 ### What sql-formatter rules apply inside PL/SQL
 
-All of them. Specifically:
-
-- **Column lists**: one per line, `AS` aliases aligned (sql-formatter §4)
-- **`--` separators**: bare `--` between column groups in SELECT (sql-formatter §5)
-- **WHERE 1 = 1**: use as anchor for multi-condition WHERE (sql-formatter §6)
-- **WHERE alignment**: pad columns so operators (`=`, `LIKE`, `>=`) align vertically (sql-formatter §6)
-- **JOINs**: `JOIN` aligns with `FROM`, `ON` indented 4 spaces under JOIN (sql-formatter §7)
-- **CTEs**: `WITH ... AS (` structure, short aliases, pipeline pattern (sql-formatter §8)
-- **CASE expressions**: WHEN/END indented, inline CASE in aggregates (sql-formatter §9)
-- **GROUP BY ALL** preferred, ORDER BY with positional references (sql-formatter §10)
-- **UNION ALL**: each block has own WHERE, ORDER BY at end (sql-formatter §11)
-- **Window functions**: OVER on same line when short (sql-formatter §13)
-- **NULLIF(..., 0)**: for aggregates that should be null when zero (sql-formatter §14)
-- **MERGE**: target `t`, source `s`, USING subquery, WHEN MATCHED/NOT MATCHED (sql-formatter §20)
+All of them. Apply the full `sql-formatter` ruleset (§4 column lists through §22 trailing whitespace) to embedded SQL, just shifted to match the surrounding PL/SQL indent. The rules live in `sql-formatter` as the single source of truth — do not restate them here.
 
 ### SELECT INTO (single row)
 
@@ -352,6 +383,26 @@ For short calls, key-value pairs can go on fewer lines but still use `=>` alignm
             'start_date',   g_start_date,
             'end_date',     g_end_date
         );
+```
+
+**Counter-example:**
+
+```sql
+-- BAD: => signs scatter, parameter list does not scan as a column
+core.create_job (
+    in_job_name => 'REBUILD_APP_' || app_id,
+    in_statement => 'APEX_APP_OBJECT_DEPENDENCY.SCAN(...);',
+    in_job_class => core_custom.g_job_class,
+    in_user_id => USER
+);
+
+-- GOOD: all => aligned at one column
+core.create_job (
+    in_job_name         => 'REBUILD_APP_' || app_id,
+    in_statement        => 'APEX_APP_OBJECT_DEPENDENCY.SCAN(...);',
+    in_job_class        => core_custom.g_job_class,
+    in_user_id          => USER
+);
 ```
 
 
@@ -521,9 +572,11 @@ For end-of-line comments, separate them with adequate spacing to form a visual c
 Use `-- comment text` on its own line for section/block descriptions. Use bare `--` on its own line as a lightweight separator.
 
 
-### 12a. Subprogram Summary Comments
+### 12a. Subprogram Summary Comments (RECOMMENDED)
 
-Every procedure and function must have a short summary comment (1-2 sentences describing what it does) placed directly above its declaration. The summary is fenced with bare `--` lines above and below:
+A short summary comment (1-2 sentences describing what it does) placed directly above the declaration helps readers scan a package spec without reading every signature. RECOMMENDED for non-trivial subprograms — especially ones that mutate state, dispatch on arguments, or have side effects beyond the obvious. Skip it for trivially-named getters/setters where the name fully describes the behavior.
+
+The summary is fenced with bare `--` lines above and below:
 
 ```sql
     --
@@ -603,8 +656,7 @@ Remove all trailing spaces and tabs from every line. No line should end with whi
 - Spaces around `||` (concatenation): `'prefix' || v_name || 'suffix'`
 - Spaces around arithmetic: `20/1440` — division in constants can be compact.
 - Space after commas in parameter lists and expressions.
-- Space before `(` in function/procedure calls: `core.raise_error ()` — actually NO space before `(` in calls: `core.raise_error()`.
-- Exception: `COALESCE (` and `REPLACE (` — built-in functions called at start of a return or assignment sometimes have a space before `(` for readability when the arguments span multiple lines. Single-line calls do not have this space.
+- **No space** before `(` in calls: `core.raise_error()`, `get_user()`, `LOWER(c.column_name)`. This applies to user functions, packages, and built-in functions — single-line and multi-line calls alike.
 
 
 ## 15. Assignment Alignment

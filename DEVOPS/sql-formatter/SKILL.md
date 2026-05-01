@@ -1,11 +1,34 @@
 ---
 name: sql-formatter
-description: "SQL formatting and style guide for Oracle views, tables, triggers, sequences, grants, MERGE/data loading, and standalone SQL statements. Use this skill whenever creating, editing, reformatting, or reviewing: SQL views (CREATE OR REPLACE VIEW), CREATE TABLE, CREATE TRIGGER, CREATE SEQUENCE, GRANT statements, MERGE/INSERT data scripts, standalone SELECT/INSERT/UPDATE/DELETE, UNION queries, CTEs (WITH clause), or any .sql file that is NOT a PL/SQL package body or spec. Triggers: SQL view, CREATE VIEW, CREATE TABLE, DDL, SQL formatting, format SELECT, format query, reformat SQL, CTE formatting, WITH clause, UNION ALL, MERGE, GRANT, sequence, trigger, _v.sql files."
+description: "Formatting style guide for Oracle SQL: views, tables, triggers, sequences, grants, MERGE/data scripts, and standalone SELECT/INSERT/UPDATE/DELETE. Use this skill on any .sql file that is NOT a PL/SQL package body or spec. For PL/SQL packages, procedures, functions, anonymous blocks, or trigger bodies use plsql-formatter instead. Triggers: CREATE VIEW, CREATE TABLE, CREATE TRIGGER, CREATE SEQUENCE, GRANT, MERGE, CTE, WITH clause, UNION, _v.sql, .sql DDL."
+version: "1.0.0"
+tags: [oracle, sql, formatting, code-style]
+license: MIT
 ---
-
 # SQL Formatter — Views, DDL & Standalone SQL
 
 This skill defines formatting rules extracted from a production Oracle codebase. It covers views, tables, triggers, sequences, grants, MERGE/data loading scripts, and standalone SQL statements. For PL/SQL packages (procedures, functions, package bodies/specs), use the `plsql-formatter` skill instead — this skill focuses on the SQL side.
+
+> **About the examples.** Code samples in this guide use real identifiers from the source codebase (`core_daily_invalid_objects_v`, `xxapp_applications`, `core.get_constant`, etc.). The rules themselves are general — substitute your own names. APEX-specific patterns are flagged with a `(APEX-specific)` marker.
+
+This is a guideline applied by an LLM, not a CLI binary. Invoke it via `/sql-formatter` and Claude (or any compatible agent) walks your file rule by rule.
+
+## How to invoke
+
+`/sql-formatter` — the agent reads the current SQL file (or selection), reports rule violations, and offers a reformatted version. Pair with `plsql-formatter` when the same change set spans both kinds of file.
+
+## Skill output contract
+
+For every file or selection, produce **two** outputs:
+
+1. **Violations** — a numbered list referencing the rule number/section and a one-line description of what to change.
+2. **Reformatted code** — the full file (or selection) with all violations resolved.
+
+Do not silently rewrite; surface the violations first so the author can spot-check.
+
+## Maintenance note (cross-skill)
+
+Sections §1 (Case Conventions), §2 (Indentation), and §22 (Trailing Whitespace) are mirrored in `plsql-formatter` so each skill stands alone. When you change one, change the other. The cross-link in `plsql-formatter` §6 ("Apply the full sql-formatter ruleset") depends on these mirrors staying in sync.
 
 **These rules also apply to SQL statements embedded inside PL/SQL code** (SELECT, INSERT, UPDATE, DELETE, MERGE inside packages, procedures, functions, triggers). When SQL appears inside PL/SQL, apply all the formatting rules below but shift the entire statement to match the PL/SQL indentation context. The SQL's internal structure (column alignment, WHERE operators, JOIN conditions, CASE layout, `--` separators) stays exactly the same relative to its own `SELECT`/`FROM`/`WHERE` keywords — only the base indent changes. See `plsql-formatter` §6 for examples of this embedding.
 
@@ -64,7 +87,7 @@ Views follow the pattern: `<prefix>_<descriptive_name>_v`. The `_v` suffix ident
 
 ### File termination
 
-Every view file ends with `END;` or the closing `;` of the query, followed by `/` on its own line, then a trailing blank line:
+Every view file ends with the closing `;` of the query (or `END;` for views that wrap a CASE/PIVOT block at the top level), followed by `/` on its own line, then a trailing blank line:
 
 ```sql
 ORDER BY
@@ -99,13 +122,13 @@ SELECT
 
 When columns have expressions of varying length, align the `AS` keyword at a consistent column position so aliases form a visual column. Short column references that are not renamed do not need `AS`.
 
-### Trailing underscores for aggregates
+### Trailing underscores for aggregates (APEX-specific)
 
-Aggregate or computed columns that shadow common names use a trailing underscore: `count_`, `error_`, `users_`.
+Aggregate or computed columns that shadow common APEX item or page-process names use a trailing underscore to avoid collisions: `count_`, `error_`, `users_`. Outside APEX, this convention is optional — pick whatever your project uses.
 
-### Style indicator columns
+### Style indicator columns (APEX-specific)
 
-For UI-facing views, add `__style` columns that return presentation hints (typically `'RED'` for problem states):
+For APEX-facing views, add `__style` columns that return presentation hints consumed by APEX classic reports (typically `'RED'` for problem states). Skip this in views that won't be consumed by APEX:
 
 ```sql
     CASE WHEN d.rendering_avg >= 1 THEN 'RED' END AS rendering_avg__style,
@@ -146,11 +169,22 @@ Use `--` separators to group: identifiers, then computed/CASE columns, then aggr
 
 ### The WHERE 1 = 1 Pattern
 
-Use `WHERE 1 = 1` as the anchor condition when there are multiple optional or filterable conditions. Each condition goes on its own line with `AND` leading:
+Use `WHERE 1 = 1` as the anchor condition when there are multiple filterable conditions. Each condition goes on its own line with `AND` leading.
+
+**Why:** every real predicate becomes a uniform `AND ...` line, so commenting one out, reordering them, or appending a new one is a one-line edit. With a "real" first predicate, the first and subsequent conditions have different shapes, which makes diffs noisier and copy/paste more error-prone. Oracle's optimizer eliminates the `1 = 1` predicate at parse time — there is no runtime cost.
+
+**Good:**
 
 ```sql
 WHERE 1 = 1
     AND t.owner         LIKE core.get_constant('G_OWNER_LIKE', 'CORE_CUSTOM')
+    AND t.status        = 'INVALID'
+```
+
+**Avoid (mixed shapes hurt diffs):**
+
+```sql
+WHERE   t.owner         LIKE core.get_constant('G_OWNER_LIKE', 'CORE_CUSTOM')
     AND t.status        = 'INVALID'
 ```
 
@@ -199,6 +233,15 @@ For simple single-condition joins, the `ON` can go on the same line as `JOIN` if
 ```sql
 JOIN apex_patches p
     ON p.images_version = r.version_no
+```
+
+**Avoid** putting the `ON` keyword on the same indent as `JOIN` or stacking conditions on a single trailing line — it loses the columnar alignment that lets readers scan join keys:
+
+```sql
+-- bad
+FROM user_ords_services s
+JOIN user_ords_modules m ON m.id = s.module_id
+JOIN user_ords_schemas c ON c.id = m.schema_id
 ```
 
 ### CROSS JOIN
@@ -562,7 +605,9 @@ Align the `IS` keyword in COMMENT ON COLUMN statements by padding the column ref
 
 ### Audit columns
 
-Tables that track changes include standard audit columns at the end: `created_by`, `created_at`, `updated_by`, `updated_at`. These use `DEFAULT SYS_CONTEXT('APEX$SESSION', 'APP_USER')` and `DEFAULT SYSDATE`.
+Tables that track changes include standard audit columns at the end: `created_by`, `created_at`, `updated_by`, `updated_at`. These use `DEFAULT SYSDATE` for the timestamps and a project-appropriate user default for the `_by` columns.
+
+**(APEX-specific)** in APEX-backed schemas the `_by` defaults are typically `DEFAULT SYS_CONTEXT('APEX$SESSION', 'APP_USER')`. Outside APEX, substitute `USER`, `SYS_CONTEXT('USERENV', 'SESSION_USER')`, or whatever your app sets in a context.
 
 
 ## 17. CREATE TRIGGER
