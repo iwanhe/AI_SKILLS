@@ -40,47 +40,11 @@ Do not assume or hardcode these. Ask once at the start of any fresh session.
 
 **Why not session-meta:** `~/.claude/usage-data/session-meta/` is used for session resumption, not by `/insights`. Manipulating it has no effect on the report date range.
 
-```python
-import os, json, shutil, glob
-from datetime import datetime, timezone, timedelta
-
-PROJECTS = os.path.expanduser("~/.claude/projects")
-TMP_DIR  = os.path.expanduser("~/.claude/usage-data/jsonl-tmp")
-os.makedirs(TMP_DIR, exist_ok=True)
-
-now    = datetime.now(timezone.utc)
-cutoff = now - timedelta(days=7)
-moved  = 0
-
-for jsonl_path in glob.glob(os.path.join(PROJECTS, "*", "*.jsonl")):
-    session_date = None
-    try:
-        with open(jsonl_path) as f:
-            for line in f:
-                obj = json.loads(line)
-                ts  = obj.get("timestamp") or obj.get("created_at")
-                if ts:
-                    session_date = datetime.fromisoformat(
-                        ts.replace("Z", "+00:00"))
-                    break
-    except Exception:
-        pass
-    if session_date is None:
-        mtime = os.path.getmtime(jsonl_path)
-        session_date = datetime.fromtimestamp(mtime, tz=timezone.utc)
-    if session_date < cutoff:
-        proj_name = os.path.basename(os.path.dirname(jsonl_path))
-        dst_dir   = os.path.join(TMP_DIR, proj_name)
-        os.makedirs(dst_dir, exist_ok=True)
-        shutil.move(jsonl_path,
-                    os.path.join(dst_dir, os.path.basename(jsonl_path)))
-        moved += 1
-
-total_active = sum(
-    1 for _ in glob.glob(os.path.join(PROJECTS, "*", "*.jsonl")))
-print(f"Temp-hid: {moved}")
-print(f"Active:   {total_active}")
+```bash
+python3 AI/SKILLS/ANALYSIS/insights-actionable/scripts/prep_sessions.py --hide
 ```
+
+Prints `Temp-hid: N` (files moved) and `Active: M` (files remaining).
 
 ### Step 1 – Regenerate the report
 
@@ -91,23 +55,11 @@ print(f"Active:   {total_active}")
 
 This (re)writes `~/.claude/usage-data/report.html`. **Immediately after the command returns** (success or failure), restore the temp-hidden JSONL files:
 
-```python
-import os, shutil, glob
-
-TMP_DIR  = os.path.expanduser("~/.claude/usage-data/jsonl-tmp")
-PROJECTS = os.path.expanduser("~/.claude/projects")
-
-restored = 0
-for jsonl_path in glob.glob(os.path.join(TMP_DIR, "*", "*.jsonl")):
-    proj_name = os.path.basename(os.path.dirname(jsonl_path))
-    dst_dir   = os.path.join(PROJECTS, proj_name)
-    os.makedirs(dst_dir, exist_ok=True)
-    shutil.move(jsonl_path,
-                os.path.join(dst_dir, os.path.basename(jsonl_path)))
-    restored += 1
-
-print(f"Restored: {restored}")
+```bash
+python3 AI/SKILLS/ANALYSIS/insights-actionable/scripts/prep_sessions.py --restore
 ```
+
+Prints `Restored: N`.
 
 Then verify the file's mtime is within the last 5 minutes:
 
@@ -161,8 +113,8 @@ Required output structure (sections in this order):
 8. `## New Ways to Use Claude Code` – `### <pattern>` blocks with description, paragraph, and `> blockquote` paste-prompt.
 9. `## On the Horizon` – `### <horizon-card>` blocks with description, "Getting started:" line, and `> blockquote` paste-prompt.
 10. `## Fun Ending` – the headline as `> blockquote`, the detail paragraph, then:
-    - `### Quick wins to try` – prose paragraph from the "C)" glance item
-    - `### Ambitious workflows` – prose paragraph from the "D)" glance item
+		- `### Quick wins to try` – prose paragraph from the "C)" glance item
+		- `### Ambitious workflows` – prose paragraph from the "D)" glance item
 
 **Critical rendering rule:** if any prompt or example contains placeholder angle brackets like `<file>`, `<path>`, `<name>`, wrap them in backticks (`` `<file>` ``). Bare `<file>` inside a Markdown blockquote breaks Obsidian rendering – it's parsed as an unclosed HTML tag and swallows the next heading.
 

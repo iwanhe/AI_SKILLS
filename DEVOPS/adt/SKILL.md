@@ -2,12 +2,11 @@
 name: adt
 description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, search APEX components, search Git history, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL, search apex, search repo, find object, object references, restore file, git history, live upload, static files, upload css, upload js, minify."
 ---
-
 # ADT (APEX Deployment Tool)
 
-ADT is a Python-based CLI tool that automates the export, patching, and deployment of Oracle Database objects and APEX applications. It reads from Git, config files, and the database — it never stores metadata in the database itself.
+ADT is a Python-based CLI tool that automates the export, patching, and deployment of Oracle Database objects and APEX applications. It reads from Git, config files, and the database — it never stores metadata in the database itself. Source and docs: https://github.com/jkvetina/ADT.
 
-ADT is invoked via a shell alias: `adt {command} {arguments}`.
+ADT is invoked via a shell alias: `adt {command} {arguments}` (see the `adt-setup` skill for installation and shell alias setup).
 
 
 ## Core Commands
@@ -183,11 +182,11 @@ adt live_upload -show                                        # list monitored fi
 1. Pick up a task, create a feature branch from `main`.
 2. Make changes in the DEV database and APEX builder.
 3. Export changes:
-   - `adt export_db -recent 1` (database objects changed today)
-   - `adt export_apex -split -readable -embedded -recent 1` (APEX changes)
-   - `adt export_data -name TABLE_NAME` (if data changed)
+	- `adt export_db -recent 1` (database objects changed today)
+	- `adt export_apex -split -readable -embedded -recent 1` (APEX changes)
+	- `adt export_data -name TABLE_NAME` (if data changed)
 4. Stage and commit exported files with the task ID prefix.
 5. When the task is complete, generate the patch:
-   - `adt patch -patch TASK-123 -create`
+	- `adt patch -patch TASK-123 -create`
 6. Commit the patch folder.
 7. Create a pull request.

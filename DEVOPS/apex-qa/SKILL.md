@@ -2,7 +2,6 @@
 name: apex-qa
 description: "Oracle APEX application quality assurance — standards for page design, component naming, MVC enforcement, and automated checks. Use this skill whenever reviewing APEX applications for quality, creating or auditing APEX pages, checking APEX naming conventions, enforcing MVC separation, reviewing embedded code reports, or setting up APEX QA checklists. Triggers: APEX review, APEX QA, APEX naming, APEX standards, page design review, embedded code, APEX audit, MVC APEX, APEX best practices, APEX page check, APEX component naming, authorization scheme, shared components."
 ---
-
 # Oracle APEX Quality Assurance
 
 This skill defines quality standards for Oracle APEX applications. It covers the MVC pattern, page design rules, component naming conventions, shared component usage, and automated checks. It does not cover PL/SQL formatting or code quality — those belong to the `plsql-formatter` and `plsql-code-quality` skills respectively.
@@ -143,14 +142,14 @@ Use application items for values that don't need to be accessible in JavaScript.
 
 Prefix process names to indicate their purpose and execution point:
 
-| Prefix | Purpose | Execution Point |
-|---|---|---|
-| `INIT_` | Set up page items, defaults | Pre-rendering |
-| `SET_` | Computations, derived values | Pre-rendering |
-| `RUN_` / `CALL_` | Execute actions | Pre-rendering |
-| `SAVE_` | Form/grid submit handling | Processing |
-| `AJAX_` / `CALL_` | AJAX callback handlers | Processing |
-| `GET_` / `CHECK_` | Validations | Processing |
+| Prefix            | Purpose                      | Execution Point |
+| ----------------- | ---------------------------- | --------------- |
+| `INIT_`           | Set up page items, defaults  | Pre-rendering   |
+| `SET_`            | Computations, derived values | Pre-rendering   |
+| `RUN_` / `CALL_`  | Execute actions              | Pre-rendering   |
+| `SAVE_`           | Form/grid submit handling    | Processing      |
+| `AJAX_` / `CALL_` | AJAX callback handlers       | Processing      |
+| `GET_` / `CHECK_` | Validations                  | Processing      |
 
 ### Regions
 

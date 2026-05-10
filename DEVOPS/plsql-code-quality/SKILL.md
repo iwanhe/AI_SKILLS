@@ -2,7 +2,6 @@
 name: plsql-code-quality
 description: "PL/SQL code quality guide covering naming conventions, anti-patterns, and structural patterns for Oracle packages, procedures, and functions. Use this skill whenever writing new PL/SQL code, reviewing existing PL/SQL for quality issues, refactoring Oracle packages, or discussing PL/SQL best practices. Triggers: PL/SQL review, code quality, naming conventions, anti-pattern, Oracle package review, refactor PL/SQL, code review Oracle, best practices PL/SQL."
 ---
-
 # PL/SQL Code Quality Guide
 
 This skill covers naming conventions, anti-patterns, and structural patterns for Oracle PL/SQL. It does not cover formatting (indentation, alignment, whitespace) — that belongs to the `plsql-formatter` skill.
@@ -34,18 +33,18 @@ These markers serve as documentation for future maintainers and as signals durin
 
 ### Variable and Parameter Prefixes
 
-| Prefix | Scope | Example |
-|---|---|---|
-| `in_` | IN parameter | `in_user_id` |
-| `out_` | OUT parameter | `out_status` |
-| `io_` | IN OUT parameter | `io_payload` |
-| `v_` | Local variable | `v_count` |
-| `g_` | Package-level (global) variable | `g_debug_mode` |
-| `c_` | Local constant | `c_max_retries` |
-| `rec` | Record / %ROWTYPE variable | `rec`, `rec_employee` |
-| `t_` | Type definition | `t_id_list`, `t_order_rec` |
-| `e_` | Exception variable | `e_lock_timeout` |
-| `cur_` | Explicit cursor | `cur_pending_orders` |
+| Prefix | Scope                           | Example                    |
+| ------ | ------------------------------- | -------------------------- |
+| `in_`  | IN parameter                    | `in_user_id`               |
+| `out_` | OUT parameter                   | `out_status`               |
+| `io_`  | IN OUT parameter                | `io_payload`               |
+| `v_`   | Local variable                  | `v_count`                  |
+| `g_`   | Package-level (global) variable | `g_debug_mode`             |
+| `c_`   | Local constant                  | `c_max_retries`            |
+| `rec`  | Record / %ROWTYPE variable      | `rec`, `rec_employee`      |
+| `t_`   | Type definition                 | `t_id_list`, `t_order_rec` |
+| `e_`   | Exception variable              | `e_lock_timeout`           |
+| `cur_` | Explicit cursor                 | `cur_pending_orders`       |
 
 The `in_`/`out_`/`io_` convention is preferred over the generic `p_` because it communicates data flow direction at a glance — a reader immediately knows whether a parameter is input, output, or both without checking the signature.
 
@@ -53,20 +52,20 @@ The `in_`/`out_`/`io_` convention is preferred over the generic `p_` because it 
 
 The naming pattern follows a consistent structure: **optional app/project prefix + descriptive name + type postfix**. The postfix identifies the object type; the prefix groups objects by application. This way, querying `WHERE object_name LIKE 'myapp\_%' ESCAPE '\'` returns everything belonging to that application.
 
-| Object | Convention | Example |
-|---|---|---|
-| Table | Plural noun, snake_case | `orders`, `order_items` |
-| View | Descriptive name + `_v` | `active_orders_v`, `user_permissions_v` |
-| Package | Domain name, no postfix | `core`, `auth`, `billing` |
-| Procedure | Verb + noun | `create_order`, `validate_input` |
-| Function | `get_`, `is_`, `has_` + noun | `get_tax_rate`, `is_valid_email` |
-| Sequence | Column name + `_seq` | `order_id_seq`, `user_id_seq` |
-| Index | Table + column(s) + `_ix` | `orders_customer_id_ix` |
-| Constraint (PK) | Table + `_pk` | `orders_pk` |
-| Constraint (UQ) | Table + column(s) + `_uq` | `users_email_uq` |
-| Constraint (FK) | Table + column + `_fk` | `orders_customer_id_fk` |
-| Constraint (NN) | Table + column + `_nn` | `users_email_nn` |
-| Trigger | Table + descriptive + `_trg` | `orders_audit_trg` |
+| Object          | Convention                   | Example                                 |
+| --------------- | ---------------------------- | --------------------------------------- |
+| Table           | Plural noun, snake_case      | `orders`, `order_items`                 |
+| View            | Descriptive name + `_v`      | `active_orders_v`, `user_permissions_v` |
+| Package         | Domain name, no postfix      | `core`, `auth`, `billing`               |
+| Procedure       | Verb + noun                  | `create_order`, `validate_input`        |
+| Function        | `get_`, `is_`, `has_` + noun | `get_tax_rate`, `is_valid_email`        |
+| Sequence        | Column name + `_seq`         | `order_id_seq`, `user_id_seq`           |
+| Index           | Table + column(s) + `_ix`    | `orders_customer_id_ix`                 |
+| Constraint (PK) | Table + `_pk`                | `orders_pk`                             |
+| Constraint (UQ) | Table + column(s) + `_uq`    | `users_email_uq`                        |
+| Constraint (FK) | Table + column + `_fk`       | `orders_customer_id_fk`                 |
+| Constraint (NN) | Table + column + `_nn`       | `users_email_nn`                        |
+| Trigger         | Table + descriptive + `_trg` | `orders_audit_trg`                      |
 
 **Why postfixes, not prefixes for types?** Postfixes keep related objects grouped together when sorted alphabetically. All `orders_*` objects appear together in the data dictionary — `orders_pk`, `orders_customer_id_fk`, `orders_customer_id_ix`, `orders_audit_trg`. With prefixes (`pk_orders`, `fk_orders_...`, `ix_orders_...`) they scatter across the alphabet.
 
@@ -147,6 +146,8 @@ END;
 ```
 
 The `core.raise_error()` call does both — it logs the error with full context (SQLCODE, SQLERRM, FORMAT_ERROR_BACKTRACE) and raises it to the caller. Known application exceptions (like `core.app_exception`) are re-raised directly since they've already been logged at the point of origin.
+
+Note: `core` here is a project-specific utility package — substitute your own central error-handling package, or build one with a single `raise_error` entry point that captures `SQLCODE`, `SQLERRM`, and `DBMS_UTILITY.FORMAT_ERROR_BACKTRACE` before re-raising.
 
 **Override**: sometimes swallowing makes sense — for instance, in an APEX error handler callback where re-raising would crash the page, or in a cleanup routine where failure is expected and harmless. In these cases, add a `-- WHY:` comment and it's fine.
 
@@ -287,11 +288,11 @@ INSERT INTO orders VALUES rec;
 
 ### Package Size Limits
 
-| Measure | Guideline |
-|---|---|
-| Package body | Under 10,000 lines |
-| Procedure/function body | Under 200 lines (excluding declarations) |
-| Inline SELECT | Under ~100 lines (move to a view beyond this) |
+| Measure                 | Guideline                                     |
+| ----------------------- | --------------------------------------------- |
+| Package body            | Under 10,000 lines                            |
+| Procedure/function body | Under 200 lines (excluding declarations)      |
+| Inline SELECT           | Under ~100 lines (move to a view beyond this) |
 
 When a package approaches the limit, split by domain or feature area. When a procedure grows too long, extract helper procedures — the original becomes a coordinator that reads like an outline.
 

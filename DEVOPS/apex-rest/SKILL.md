@@ -2,7 +2,6 @@
 name: apex-rest
 description: "Oracle APEX RESTful data service standards — module/template/handler design, package-backed handlers, naming conventions, error handling, and maintainability patterns. Use this skill whenever creating, reviewing, or debugging APEX REST services, ORDS modules, RESTful data services, or REST API endpoints in Oracle APEX. Triggers: REST service, ORDS, RESTful data service, REST API, REST module, REST handler, REST template, HTP.P, APEX_JSON, REST endpoint, web service APEX, API APEX, REST debug."
 ---
-
 # Oracle APEX REST Service Standards
 
 This skill covers the design, naming, and quality standards for RESTful data services in Oracle APEX (ORDS). The core principle is the same as for APEX pages: keep all logic in packages, use the REST handler only as a thin dispatcher, and make everything testable and traceable.
@@ -67,21 +66,21 @@ END;
 
 Name the module after the domain or functional area it serves. Use the application prefix if applicable. The module name becomes the package name.
 
-| Module name | Package name | Base path |
-|---|---|---|
-| `xxabc_images` | `xxabc_images` | `/images/` |
-| `xxabc_orders` | `xxabc_orders` | `/orders/` |
+| Module name     | Package name    | Base path   |
+| --------------- | --------------- | ----------- |
+| `xxabc_images`  | `xxabc_images`  | `/images/`  |
+| `xxabc_orders`  | `xxabc_orders`  | `/orders/`  |
 | `xxabc_reports` | `xxabc_reports` | `/reports/` |
 
 ### Templates
 
 Name the template after the resource or action. The template name becomes the procedure name in the package.
 
-| Template URI | Procedure |
-|---|---|
-| `user_profile/:id` | `xxabc_images.user_profile(p_id => :id)` |
-| `order_detail/:order_id` | `xxabc_orders.order_detail(p_order_id => :order_id)` |
-| `monthly/:year/:month` | `xxabc_reports.monthly(p_year => :year, p_month => :month)` |
+| Template URI             | Procedure                                                   |
+| ------------------------ | ----------------------------------------------------------- |
+| `user_profile/:id`       | `xxabc_images.user_profile(p_id => :id)`                    |
+| `order_detail/:order_id` | `xxabc_orders.order_detail(p_order_id => :order_id)`        |
+| `monthly/:year/:month`   | `xxabc_reports.monthly(p_year => :year, p_month => :month)` |
 
 This 1:1 mapping between URI structure and package structure means you can find the code for any service endpoint instantly.
 
@@ -138,8 +137,8 @@ PROCEDURE download (
 AS
 BEGIN
     OWA_UTIL.MIME_HEADER(NVL(p_file_mime, 'application/octet'), FALSE);
-    HTP.P('Content-length:' || DBMS_LOB.GETLENGTH(p_payload));
-    HTP.P('Content-Disposition: attachment; filename=' || NVL(p_file_name, 'file'));
+    HTP.P('Content-length:'                            || DBMS_LOB.GETLENGTH(p_payload)); 
+    HTP.P('Content-Disposition: attachment; filename=' || NVL(p_file_name, 'file'));      
     --
     IF p_file_updated IS NOT NULL THEN
         HTP.P('Cache-Control: max-age=31536000');
@@ -190,14 +189,14 @@ Never let a REST service return an unstructured Oracle error message to the cons
 
 Use these views to inspect and audit your REST services:
 
-| View | Contents |
-|---|---|
-| `USER_ORDS_SERVICES` | Aggregated view of modules, templates, and handlers |
-| `USER_ORDS_MODULES` | Module definitions |
-| `USER_ORDS_TEMPLATES` | Template URIs |
-| `USER_ORDS_HANDLERS` | Handler methods and source |
-| `USER_ORDS_PARAMETERS` | Declared parameters (if any) |
-| `USER_ORDS_SCHEMAS` | ORDS-enabled schemas |
+| View                   | Contents                                            |
+| ---------------------- | --------------------------------------------------- |
+| `USER_ORDS_SERVICES`   | Aggregated view of modules, templates, and handlers |
+| `USER_ORDS_MODULES`    | Module definitions                                  |
+| `USER_ORDS_TEMPLATES`  | Template URIs                                       |
+| `USER_ORDS_HANDLERS`   | Handler methods and source                          |
+| `USER_ORDS_PARAMETERS` | Declared parameters (if any)                        |
+| `USER_ORDS_SCHEMAS`    | ORDS-enabled schemas                                |
 
 Full join to see everything:
 

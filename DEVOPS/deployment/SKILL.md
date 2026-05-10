@@ -2,7 +2,6 @@
 name: deployment
 description: "Oracle APEX deployment process — environment strategy, Git branching, developer workflow, release and hotfix procedures, QA checks, CI/CD automation, and ADT tooling. Use this skill whenever planning, reviewing, or executing deployments, setting up CI/CD pipelines, configuring Git branching strategy, preparing patches, reviewing pull requests against deployment standards, onboarding developers to the deployment process, or discussing release management for Oracle APEX projects. Triggers: deployment, release, hotfix, patch, CI/CD, branching strategy, pull request review, PR checklist, deployment process, release management, environment sync, Git workflow APEX, deployment log, patch script, squash merge, rebase, feature branch."
 ---
-
 # Oracle APEX Deployment Process
 
 This skill defines the complete deployment process for Oracle APEX projects. It covers environment strategy, version control, development workflow, release and hotfix procedures, QA checks, CI/CD automation, and tooling.

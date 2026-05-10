@@ -2,7 +2,6 @@
 name: data-model
 description: "Oracle data model design standards — table design, column conventions, constraints, indexes, and data integrity patterns. Use this skill whenever designing database tables, reviewing a data model, creating or modifying constraints and indexes, naming database objects, or planning schema changes for Oracle APEX applications. Triggers: data model, table design, database design, schema design, constraints, indexes, foreign keys, primary keys, normalization, Oracle DDL, column naming, entity relationship, ERD, data modeler."
 ---
-
 # Oracle Data Model Design Standards
 
 This skill covers table design, column conventions, constraints, indexes, and data integrity patterns for Oracle databases. It complements the `plsql-code-quality` skill (which covers naming conventions for all database objects) by focusing specifically on the structural design of the data layer.
@@ -81,15 +80,15 @@ Foreign key columns should match the referenced primary key: `orders.customer_id
 
 Be consistent with data types across the schema. If `customer_id` is `NUMBER` in one table, it must be `NUMBER` everywhere. Common conventions:
 
-| Purpose | Type | Notes |
-|---|---|---|
-| Surrogate keys | `NUMBER` | Or `NUMBER GENERATED AS IDENTITY` |
-| Short text | `VARCHAR2(n)` | Use realistic lengths, not 4000 everywhere |
-| Long text | `CLOB` | For unbounded text |
-| Dates | `DATE` | Unless sub-second precision needed |
-| Timestamps | `TIMESTAMP` or `TIMESTAMP WITH TIME ZONE` | When sub-second or timezone matters |
-| Booleans | `VARCHAR2(1)` or `NUMBER(1)` | `'Y'/'N'` or `1/0` — pick one and be consistent |
-| Money/amounts | `NUMBER(p, s)` | Always specify precision and scale |
+| Purpose        | Type                                      | Notes                                           |
+| -------------- | ----------------------------------------- | ----------------------------------------------- |
+| Surrogate keys | `NUMBER`                                  | Or `NUMBER GENERATED AS IDENTITY`               |
+| Short text     | `VARCHAR2(n)`                             | Use realistic lengths, not 4000 everywhere      |
+| Long text      | `CLOB`                                    | For unbounded text                              |
+| Dates          | `DATE`                                    | Unless sub-second precision needed              |
+| Timestamps     | `TIMESTAMP` or `TIMESTAMP WITH TIME ZONE` | When sub-second or timezone matters             |
+| Booleans       | `VARCHAR2(1)` or `NUMBER(1)`              | `'Y'/'N'` or `1/0` — pick one and be consistent |
+| Money/amounts  | `NUMBER(p, s)`                            | Always specify precision and scale              |
 
 Avoid using `CHAR` — it pads with spaces and causes subtle comparison bugs. Use `VARCHAR2` for everything string-based.
 
@@ -106,13 +105,13 @@ Name your NOT NULL constraints: `orders_customer_id_nn`. When a constraint viola
 
 Name every constraint explicitly. System-generated names like `SYS_C007234` are useless in error messages and impossible to reference in code.
 
-| Type | Convention | Example |
-|---|---|---|
-| Primary Key | `{table}_pk` | `orders_pk` |
-| Unique | `{table}_{column(s)}_uq` | `users_email_uq` |
-| Foreign Key | `{table}_{column}_fk` | `orders_customer_id_fk` |
-| Check | `{table}_{column}_ck` | `orders_status_ck` |
-| Not Null | `{table}_{column}_nn` | `orders_customer_id_nn` |
+| Type        | Convention               | Example                 |
+| ----------- | ------------------------ | ----------------------- |
+| Primary Key | `{table}_pk`             | `orders_pk`             |
+| Unique      | `{table}_{column(s)}_uq` | `users_email_uq`        |
+| Foreign Key | `{table}_{column}_fk`    | `orders_customer_id_fk` |
+| Check       | `{table}_{column}_ck`    | `orders_status_ck`      |
+| Not Null    | `{table}_{column}_nn`    | `orders_customer_id_nn` |
 
 ### Foreign Keys
 
