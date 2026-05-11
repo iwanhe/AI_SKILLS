@@ -188,7 +188,7 @@ Use **two blank lines** (one empty line visually) between subprogram declaration
     PROCEDURE create_lock (
 ```
 
-Within a subprogram body, use a **standalone dash-comment** (`--`) on its own line as a lightweight section separator between logical blocks of code:
+Within a subprogram body, use a **standalone dash-comment** (`--`) on its own line only as a lightweight separator inside the same logical section. When a descriptive block comment introduces a new logical section, put a real blank line above the descriptive comment.
 
 ```sql
     BEGIN
@@ -214,7 +214,7 @@ Within a subprogram body, use a **standalone dash-comment** (`--`) on its own li
         END IF;
 ```
 
-The bare `--` line is used as a visual "soft break" between related statements within the same logical section, while descriptive comments (`-- check hash only on objects`) introduce new logical sections.
+The bare `--` line is used as a visual "soft break" between related statements within the same logical section. It is not a substitute for the blank line above descriptive comments such as `-- check hash only on objects`.
 
 Use section header comments with dashes for major groupings inside package specs:
 
@@ -604,7 +604,7 @@ This applies in both package specs and bodies. In the body, the summary goes abo
 
 ### 12b. Block Comments Within Code
 
-Inside a subprogram body, group related statements into logical blocks of **no more than 5 statements** each. Place a short descriptive `--` comment above each block explaining what it does. Separate blocks with a bare `--` line or a blank line.
+Inside a subprogram body, group related statements into logical blocks of **no more than 5 statements** each. Place a short descriptive `--` comment above each block explaining what it does. Put a real blank line before each descriptive block comment. Use a bare `--` line only as a soft separator inside a logical section, not as the separator before a new descriptive block comment.
 
 This helps readers quickly scan a procedure and understand its flow without reading every line. If a block grows beyond 5 statements, look for a natural split point and break it into two commented blocks.
 
@@ -864,7 +864,7 @@ When formatting PL/SQL code, verify:
 4. Parameters vertically aligned in columns (name, type, default)
 5. Constants/variables vertically aligned (name, CONSTANT, type, := value)
 6. Two blank lines between subprograms
-7. Bare `--` used as section separators within code
+7. Bare `--` used only as soft separators inside a logical section; blank line before descriptive block comments
 8. SQL SELECT columns each on own line, aliases aligned
 9. WHERE conditions aligned with `AND`/`OR` leading subsequent lines
 10. Named parameters with `=>` aligned vertically
@@ -873,7 +873,7 @@ When formatting PL/SQL code, verify:
 13. No trailing whitespace on any line
 14. Only `--` comments, never `/* */`
 15. Every subprogram has a `--` / `-- summary` / `--` comment header
-16. Code blocks of max 5 statements, each with a descriptive comment above
+16. Code blocks of max 5 statements, each with a descriptive comment above and a blank line before that comment
 17. Assignments aligned when in sequence
 18. File ends with `END;` + `/` + blank line
 19. Prefixes: `in_`/`out_`/`io_` for params, `v_` local vars, `g_` globals, `c_` local constants, `rec` for rowtype
