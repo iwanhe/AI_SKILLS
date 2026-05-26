@@ -43,21 +43,27 @@ The devils shine when there's genuine uncertainty and the cost of a bad call is 
 ## The five devils
 
 ### Skeptic
+
 Hunts for the fatal flaw. Assumes the idea has a hidden problem and tries to find it. If everything looks solid, digs deeper. Not a doomer – the friend who saves you from a bad deal by asking the question you were avoiding.
 
 ### Architect
+
 Challenges the framing itself. Strips away assumptions and rebuilds the question from the ground up. Often the most valuable angle: "you're solving the wrong problem."
 
 ### Scout
+
 Hunts for the upside everyone else is missing. What could be bigger? What adjacent opportunity is hiding in plain sight? What's being undervalued? Doesn't care about risk – cares about what happens if this works far better than expected.
 
 ### Stranger
+
 Has zero context about you, your work, your history. Reacts only to what's on the page. Catches the curse of knowledge: terms you assume everyone knows, value you assume is obvious, framing that reads clear to you and confusing to anyone else.
 
 ### Operator
+
 Only cares about Monday morning. Ignores theory and big-picture thinking. If an idea sounds brilliant but has no clear first step, the Operator says so. Every output ends with a concrete action.
 
 ### Why these five
+
 Three deliberate tensions:
 - Skeptic vs Scout – downside vs upside.
 - Architect vs Operator – rethink vs ship.
@@ -478,3 +484,4 @@ Red-team a pivot you are uncertain about:
 ```bash
 /devils I'm thinking of pivoting from consulting to a SaaS product, am I crazy
 ```
+

@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: apex-qa
 description: "Oracle APEX application quality assurance — standards for page design, component naming, MVC enforcement, and automated checks. Use this skill whenever reviewing APEX applications for quality, creating or auditing APEX pages, checking APEX naming conventions, enforcing MVC separation, reviewing embedded code reports, or setting up APEX QA checklists. Triggers: APEX review, APEX QA, APEX naming, APEX standards, page design review, embedded code, APEX audit, MVC APEX, APEX best practices, APEX page check, APEX component naming, authorization scheme, shared components."
 ---
@@ -8,6 +10,10 @@ This skill defines quality standards for Oracle APEX applications. It covers the
 
 The goal is to keep APEX applications maintainable, consistent, and debuggable. Most of the rules below exist because violating them creates problems that are invisible until production — missing auth schemes, scattered inline SQL, unnamed components that nobody can trace.
 
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp apex-qa`
 
 ## MVC Pattern in APEX
 
@@ -240,3 +246,25 @@ When reviewing an APEX application or a pull request that includes APEX changes,
 - Embedded Code Report has been reviewed and no new inline code was introduced.
 - APEX Advisor has been run and findings addressed.
 - All relevant APEX exports are present in the commit: split export, readable export, and embedded code report.
+
+
+## Examples
+
+Audit an APEX application against the QA standards before a pull request:
+
+```bash
+/apex-qa
+```
+
+Review a single page's design for naming, MVC separation, and authorization:
+
+```bash
+/apex-qa
+```
+
+Run the manual review checklist after importing the Embedded Code Report:
+
+```bash
+/apex-qa
+```
+

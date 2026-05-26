@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: sql-formatter
 description: "Formatting style guide for Oracle SQL: views, tables, triggers, sequences, grants, MERGE/data scripts, and standalone SELECT/INSERT/UPDATE/DELETE. Use this skill on any .sql file that is NOT a PL/SQL package body or spec. For PL/SQL packages, procedures, functions, anonymous blocks, or trigger bodies use plsql-formatter instead. Triggers: CREATE VIEW, CREATE TABLE, CREATE TRIGGER, CREATE SEQUENCE, GRANT, MERGE, CTE, WITH clause, UNION, _v.sql, .sql DDL."
 version: "1.0.0"
@@ -12,6 +14,10 @@ This skill defines formatting rules extracted from a production Oracle codebase.
 > **About the examples.** Code samples in this guide use real identifiers from the source codebase (`core_daily_invalid_objects_v`, `xxapp_applications`, `core.get_constant`, etc.). The rules themselves are general — substitute your own names. APEX-specific patterns are flagged with a `(APEX-specific)` marker.
 
 This is a guideline applied by an LLM, not a CLI binary. Invoke it via `/sql-formatter` and Claude (or any compatible agent) walks your file rule by rule.
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp sql-formatter`
 
 ## How to invoke
 
@@ -844,3 +850,25 @@ Remove all trailing spaces and tabs from every line. Blank lines must be truly e
 28. File ends with `;` + `/` on its own line + trailing blank line
 29. No trailing whitespace on any line
 30. Only `--` comments, never `/* */`
+
+
+## Examples
+
+Format a view DDL file in place:
+
+```bash
+/sql-formatter core_daily_invalid_objects_v.sql
+```
+
+Reformat a CREATE TABLE script with aligned columns and named constraints:
+
+```bash
+/sql-formatter
+```
+
+Review a MERGE data-loading script for violations:
+
+```bash
+/sql-formatter
+```
+

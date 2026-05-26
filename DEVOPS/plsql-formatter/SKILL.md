@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: plsql-formatter
 description: "Formatting style guide for Oracle PL/SQL code: packages, procedures, functions, package bodies, package specs, anonymous blocks, and any SQL embedded inside PL/SQL. Use this skill when a file contains CREATE OR REPLACE PACKAGE, CREATE OR REPLACE PROCEDURE, CREATE OR REPLACE FUNCTION, CREATE OR REPLACE TRIGGER body, or a DECLARE/BEGIN block. For pure DDL (views, tables, sequences, grants, standalone SELECT/MERGE) use sql-formatter instead. Triggers: PL/SQL, package body, package spec, stored procedure, stored function, anonymous block, reformat package, .pks, .pkb."
 version: "1.0.0"
@@ -12,6 +14,10 @@ This skill defines formatting rules extracted from a production Oracle PL/SQL co
 > **About the examples.** Code samples in this guide use real identifiers from the source codebase (`core_lock`, `core_locks`, `xxapp_applications`, `core.raise_error`, etc.). The rules themselves are general — substitute your own names. APEX-specific patterns are flagged as such with a `(APEX-specific)` marker.
 
 > **This is a guideline applied by an LLM, not a CLI binary.** The skill ships a style guide; Claude (or another model that loads it) applies the rules while editing code. There is no `plsql-formatter --in foo.sql --out bar.sql` executable. To enforce the rules in CI, pair this skill with a linter you control.
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp plsql-formatter`
 
 ## How to invoke
 
@@ -882,3 +888,25 @@ When formatting PL/SQL code, verify:
 22. `SQL%ROWCOUNT` checks separated from DML by bare `--`
 23. `FETCH FIRST N ROWS ONLY` on its own line, aligned with `ORDER BY`
 24. Right-aligned trailing comments on nested expressions
+
+
+## Examples
+
+Format a package body file in place:
+
+```bash
+/plsql-formatter core_lock.sql
+```
+
+Review a procedure for violations without rewriting it:
+
+```bash
+/plsql-formatter
+```
+
+Reformat a pasted anonymous block:
+
+```bash
+/plsql-formatter
+```
+

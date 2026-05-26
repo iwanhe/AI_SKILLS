@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: apex-rest
 description: "Oracle APEX RESTful data service standards — module/template/handler design, package-backed handlers, naming conventions, error handling, and maintainability patterns. Use this skill whenever creating, reviewing, or debugging APEX REST services, ORDS modules, RESTful data services, or REST API endpoints in Oracle APEX. Triggers: REST service, ORDS, RESTful data service, REST API, REST module, REST handler, REST template, HTP.P, APEX_JSON, REST endpoint, web service APEX, API APEX, REST debug."
 ---
@@ -10,6 +12,10 @@ REST services in APEX are notoriously difficult to debug. When you paste code di
 
 For further reading: [Building maintainable REST services in APEX](https://www.oneoracledeveloper.com/2025/09/building-maintainable-rest-services-in.html).
 
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp apex-rest`
 
 ## REST Service Architecture
 
@@ -226,3 +232,25 @@ When reviewing REST services, verify:
 - Arguments are passed via named parameters, not positional.
 - REST services are included in the ADT export (`adt export_apex -rest`) and committed alongside other APEX changes.
 - Services are tested from PL/SQL (procedure call) and from HTTP (actual endpoint) before the pull request.
+
+
+## Examples
+
+Review a new ORDS module against the package-backed handler standards:
+
+```bash
+/apex-rest
+```
+
+Debug a REST endpoint that returns a raw Oracle error instead of structured JSON:
+
+```bash
+/apex-rest
+```
+
+Design the module, template, and handler naming for a new image-serving service:
+
+```bash
+/apex-rest
+```
+

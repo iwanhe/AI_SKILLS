@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: adt
 description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, search APEX components, search Git history, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL, search apex, search repo, find object, object references, restore file, git history, live upload, static files, upload css, upload js, minify."
 ---
@@ -9,6 +11,10 @@ ADT is a Python-based CLI tool that automates the export, patching, and deployme
 ADT is invoked via a shell alias: `adt {command} {arguments}` (see the `adt-setup` skill for installation and shell alias setup).
 
 
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp adt`
+
 ## Core Commands
 
 
@@ -18,14 +24,36 @@ Export database objects into the repository folder structure. Each object become
 
 For full details on flags, output structure, cleanup behavior, and edge cases, read `references/export-db.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Objects changed in last 7 days:
 
 ```bash
-adt export_db -recent 7                                    # objects changed in last 7 days
-adt export_db -type PACKAGE% VIEW%                         # specific object types
-adt export_db -name APP_% -recent 7                        # combine name + time filters
-adt export_db -type JOB                                    # jobs (no -recent — jobs lack timestamp)
-adt export_db -recent 7 -delete                            # clean export (delete folders first)
+adt export_db -recent 7
+```
+
+Specific object types:
+
+```bash
+adt export_db -type PACKAGE% VIEW%
+```
+
+Combine name + time filters:
+
+```bash
+adt export_db -name APP_% -recent 7
+```
+
+Jobs (no `-recent` – jobs lack timestamp):
+
+```bash
+adt export_db -type JOB
+```
+
+Clean export (delete folders first):
+
+```bash
+adt export_db -recent 7 -delete
 ```
 
 **Critical:** JOB objects have no `last_ddl_time` — never combine `-type JOB` with `-recent`. Export jobs separately without the `-recent` flag.
@@ -39,13 +67,30 @@ Export APEX applications, components, REST services, and workspace files. Suppor
 
 For full details on flags, formats, workflows, and troubleshooting, read `references/export-apex.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Typical export:
 
 ```bash
-adt export_apex -app 100 -only -full -split -files -rest -readable -recent 0   # typical export
-adt export_apex -app 100 200 -only -split -readable -recent 3                  # multiple apps, recent changes
-adt export_apex -reveal                                                         # list available apps
-adt export_apex -reveal -schema APPS                                            # list apps for a different schema
+adt export_apex -app 100 -only -full -split -files -rest -readable -recent 0
+```
+
+Multiple apps, recent changes only in listing:
+
+```bash
+adt export_apex -app 100 200 -only -split -readable -recent 3
+```
+
+List available apps:
+
+```bash
+adt export_apex -reveal
+```
+
+List apps under a different schema:
+
+```bash
+adt export_apex -reveal -schema APPS
 ```
 
 **Rules:**
@@ -63,12 +108,24 @@ Export table data (seed data, LOV tables, configuration) into CSV files with aut
 
 For full details on flags, output format, limitations, and NLS considerations, read `references/export-data.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Specific tables:
 
 ```bash
-adt export_data -name CONFIG_PARAMETERS LOV_STATUS        # specific tables
-adt export_data -name CONFIG% LOV_%                        # wildcard patterns
-adt export_data                                            # re-export all previously exported tables
+adt export_data -name CONFIG_PARAMETERS LOV_STATUS
+```
+
+Wildcard patterns:
+
+```bash
+adt export_data -name CONFIG% LOV_%
+```
+
+Re-export all previously exported tables:
+
+```bash
+adt export_data
 ```
 
 **Limitations:** BLOB, CLOB, XMLTYPE, JSON columns are not exported. Audit columns (CREATED_BY, CREATED_AT, etc.) are skipped per config. Set correct NLS date formats on target environments before running the generated `.sql` files.
@@ -82,18 +139,60 @@ Create and deploy patch files from Git commits. The most powerful ADT command �
 
 For full details on all flags, patch templates/scripts, object ordering, output structure, and known limitations, read `references/patch.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Preview matching commits:
 
 ```bash
-adt patch -target UAT -patch TASK_ID                          # preview matching commits
-adt patch -target UAT -patch TASK_ID -create                  # create the patch
-adt patch -target UAT -patch TASK_ID -create -deploy          # create and deploy
-adt patch -target UAT -patch TASK_ID -deploy -force           # force redeploy
-adt patch -target UAT -commits 50 -my                         # browse my recent commits
-adt patch -target UAT -patch TASK_ID -commit 1-20 -ignore 5   # cherry-pick commits
-adt patch -target UAT -patch TASK_ID -head                    # use HEAD file versions
-adt patch -target UAT -patch TASK_ID -local                   # use local (uncommitted) files
-adt patch -target UAT -patch TASK_ID -create -full            # full APEX export in patch
+adt patch -target UAT -patch TASK_ID
+```
+
+Create the patch:
+
+```bash
+adt patch -target UAT -patch TASK_ID -create
+```
+
+Create and deploy:
+
+```bash
+adt patch -target UAT -patch TASK_ID -create -deploy
+```
+
+Force redeploy:
+
+```bash
+adt patch -target UAT -patch TASK_ID -deploy -force
+```
+
+Browse my recent commits:
+
+```bash
+adt patch -target UAT -commits 50 -my
+```
+
+Cherry-pick commits (ranges supported, e.g. `1-20`):
+
+```bash
+adt patch -target UAT -patch TASK_ID -commit 1-20 -ignore 5
+```
+
+Use HEAD file versions:
+
+```bash
+adt patch -target UAT -patch TASK_ID -head
+```
+
+Use local (uncommitted) files:
+
+```bash
+adt patch -target UAT -patch TASK_ID -local
+```
+
+Full APEX export in patch:
+
+```bash
+adt patch -target UAT -patch TASK_ID -create -full
 ```
 
 **Key concepts:**
@@ -112,12 +211,24 @@ Recompile invalid database objects. Supports forced recompilation with PL/SQL co
 
 For full details on flags, behavior, and use cases, read `references/recompile.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Recompile invalid objects:
 
 ```bash
-adt recompile -target DEV                                  # recompile invalid objects
-adt recompile -target DEV -force -native -level 3          # force recompile all with native + optimization
-adt recompile -target DEV -type PACKAGE% -name XX%         # scope by type and name
+adt recompile -target DEV
+```
+
+Force recompile all with native + optimization:
+
+```bash
+adt recompile -target DEV -force -native -level 3
+```
+
+Scope by type and name:
+
+```bash
+adt recompile -target DEV -type PACKAGE% -name XX%
 ```
 
 
@@ -127,14 +238,36 @@ Search for database objects referenced by APEX applications. Parses the Embedded
 
 For full details on flags, output format, patch integration, and tips, read `references/search-apex.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+All referenced objects in app:
 
 ```bash
-adt search_apex -app 100                                     # all referenced objects in app
-adt search_apex -app 100 -page 1 10                          # objects on specific pages
-adt search_apex -app 100 -name APP_% -type PACKAGE           # filter by name and type
-adt search_apex -app 100 -schema HR                          # precise matching via schema prefix
-adt search_apex -app 100 -patch TASK-123                     # copy refs to patch_scripts folder
+adt search_apex -app 100
+```
+
+Objects on specific pages:
+
+```bash
+adt search_apex -app 100 -page 1 10
+```
+
+Filter by name and type:
+
+```bash
+adt search_apex -app 100 -name APP_% -type PACKAGE
+```
+
+Precise matching via schema prefix:
+
+```bash
+adt search_apex -app 100 -schema HR
+```
+
+Copy refs to patch_scripts folder:
+
+```bash
+adt search_apex -app 100 -patch TASK-123
 ```
 
 **Prerequisite:** run `adt export_apex -app {ID} -only -embedded` first to generate the embedded code report.
@@ -146,15 +279,42 @@ Search Git commit history for database objects — by commit message, file name,
 
 For full details on flags, restore behavior, and tips, read `references/search-repo.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Find commits by message:
 
 ```bash
-adt search_repo -summary TASK-123                            # find commits by message
-adt search_repo -file MY_PACKAGE                             # find file (even deleted ones)
-adt search_repo -type VIEW -recent 30                        # view changes in last 30 days
-adt search_repo -name APP_CORE% -my                          # my changes to matching objects
-adt search_repo -file MY_PACKAGE -restore                    # restore historical versions
-adt search_repo -file MY_PACKAGE -restore -stage             # restore as staged git commits
+adt search_repo -summary TASK-123
+```
+
+Find file (even deleted ones):
+
+```bash
+adt search_repo -file MY_PACKAGE
+```
+
+View changes in last 30 days:
+
+```bash
+adt search_repo -type VIEW -recent 30
+```
+
+My changes to matching objects:
+
+```bash
+adt search_repo -name APP_CORE% -my
+```
+
+Restore historical versions:
+
+```bash
+adt search_repo -file MY_PACKAGE -restore
+```
+
+Restore as staged git commits:
+
+```bash
+adt search_repo -file MY_PACKAGE -restore -stage
 ```
 
 **Prerequisite:** commit index must exist — run `adt patch -target {ENV} -rebuild` if missing.
@@ -166,14 +326,36 @@ Monitor a local folder and automatically upload changed JS, CSS, and other stati
 
 For full details on flags, minification, monitored directories, and tips, read `references/live-upload.md`.
 
-**Quick reference:**
+**Quick reference** – pick one line, run as its own bash call:
+
+Monitor with defaults from config:
 
 ```bash
-adt live_upload                                              # monitor with defaults from config
-adt live_upload -app 100                                     # monitor a specific app's files
-adt live_upload -app 100 -folder ./my_static/                # custom folder
-adt live_upload -workspace                                   # workspace files instead of app files
-adt live_upload -show                                        # list monitored files at startup
+adt live_upload
+```
+
+Monitor a specific app's files:
+
+```bash
+adt live_upload -app 100
+```
+
+Custom folder:
+
+```bash
+adt live_upload -app 100 -folder ./my_static/
+```
+
+Workspace files instead of app files:
+
+```bash
+adt live_upload -workspace
+```
+
+List monitored files at startup:
+
+```bash
+adt live_upload -show
 ```
 
 
@@ -190,3 +372,31 @@ adt live_upload -show                                        # list monitored fi
 	- `adt patch -patch TASK-123 -create`
 6. Commit the patch folder.
 7. Create a pull request.
+
+
+## Examples
+
+Export database objects changed in the last week:
+
+```bash
+adt export_db -recent 7
+```
+
+Export an APEX app with the typical format set:
+
+```bash
+adt export_apex -app 100 -only -full -split -files -rest -readable -recent 0
+```
+
+Create and deploy a patch to UAT for a task:
+
+```bash
+adt patch -target UAT -patch TASK-123 -create -deploy
+```
+
+Recompile invalid objects on DEV:
+
+```bash
+adt recompile -target DEV
+```
+

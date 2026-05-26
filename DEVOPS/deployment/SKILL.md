@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-16
 name: deployment
 description: "Oracle APEX deployment process — environment strategy, Git branching, developer workflow, release and hotfix procedures, QA checks, CI/CD automation, and ADT tooling. Use this skill whenever planning, reviewing, or executing deployments, setting up CI/CD pipelines, configuring Git branching strategy, preparing patches, reviewing pull requests against deployment standards, onboarding developers to the deployment process, or discussing release management for Oracle APEX projects. Triggers: deployment, release, hotfix, patch, CI/CD, branching strategy, pull request review, PR checklist, deployment process, release management, environment sync, Git workflow APEX, deployment log, patch script, squash merge, rebase, feature branch."
 ---
@@ -7,6 +9,10 @@ description: "Oracle APEX deployment process — environment strategy, Git branc
 This skill defines the complete deployment process for Oracle APEX projects. It covers environment strategy, version control, development workflow, release and hotfix procedures, QA checks, CI/CD automation, and tooling.
 
 The full process document is in `references/process.md`. Read it when you need the complete details. Below is a summary of each section and guidance on when to consult it.
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp deployment`
 
 ## When to use this skill
 
@@ -82,3 +88,4 @@ Only Todo, In Progress, In Review, and Done are visible on the board. Swimlanes 
 - `plsql-code-quality` — PL/SQL code quality guidelines
 - `data-model` — Database design standards
 - `apex-rest` — REST service standards
+

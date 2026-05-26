@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: plsql-code-quality
 description: "PL/SQL code quality guide covering naming conventions, anti-patterns, and structural patterns for Oracle packages, procedures, and functions. Use this skill whenever writing new PL/SQL code, reviewing existing PL/SQL for quality issues, refactoring Oracle packages, or discussing PL/SQL best practices. Triggers: PL/SQL review, code quality, naming conventions, anti-pattern, Oracle package review, refactor PL/SQL, code review Oracle, best practices PL/SQL."
 ---
@@ -8,6 +10,10 @@ This skill covers naming conventions, anti-patterns, and structural patterns for
 
 The philosophy here is to trust the developer. These are guardrails, not handcuffs. Every rule has a reason, and when the reason doesn't apply, the developer can override it — as long as they leave a comment explaining why.
 
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp plsql-code-quality`
 
 ## Comment Markers for Intentional Overrides
 
@@ -393,3 +399,25 @@ When reviewing PL/SQL, check for:
 **Structure**: no inline SELECT over ~100 lines (should be a `_v` view), procedures under 200 lines, package under 10,000 lines, records used for large INSERT/UPDATE, logic lives in the database not the application layer, no duplicated SQL/logic blocks, one compound trigger per table (not multiple individual triggers), APEX page logic in dedicated `_p{page}` packages.
 
 **Comments**: `-- WHY:` on any workaround or intentional rule violation, `-- VERIFY:` on uncertain code, subprogram summaries present (per the `plsql-formatter` skill).
+
+
+## Examples
+
+Review a package body for naming, anti-patterns, and structural issues:
+
+```bash
+/plsql-code-quality
+```
+
+Refactor a procedure that swallows exceptions and hardcodes status values:
+
+```bash
+/plsql-code-quality
+```
+
+Check a new package against the code review checklist before committing:
+
+```bash
+/plsql-code-quality
+```
+

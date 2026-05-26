@@ -1,4 +1,6 @@
 ---
+created: 2026-04-16
+updated: 2026-05-20
 name: data-model
 description: "Oracle data model design standards — table design, column conventions, constraints, indexes, and data integrity patterns. Use this skill whenever designing database tables, reviewing a data model, creating or modifying constraints and indexes, naming database objects, or planning schema changes for Oracle APEX applications. Triggers: data model, table design, database design, schema design, constraints, indexes, foreign keys, primary keys, normalization, Oracle DDL, column naming, entity relationship, ERD, data modeler."
 ---
@@ -8,6 +10,10 @@ This skill covers table design, column conventions, constraints, indexes, and da
 
 A well-designed data model is the most valuable investment in any application. Poor design will haunt you for the lifetime of the project — every workaround, every denormalization shortcut, every unnamed constraint accumulates into technical debt that becomes harder to fix as data grows.
 
+
+## Stamp
+
+On success, run: `python3 /Users/dobby/Library/CloudStorage/Dropbox/BRAIN/AI/SCRIPTS/skills_log.py stamp data-model`
 
 ## Design Principles
 
@@ -188,3 +194,25 @@ COMMENT ON COLUMN orders.cached_total IS 'Denormalized from order_items for dash
 ```
 
 This saves the next developer from "fixing" what looks like a mistake but is actually an intentional decision.
+
+
+## Examples
+
+Design a new set of tables for an orders module, applying naming and constraint conventions:
+
+```bash
+/data-model
+```
+
+Review an existing schema for missing foreign-key indexes and unnamed constraints:
+
+```bash
+/data-model
+```
+
+Plan an additive schema change with repeatable DDL before writing the migration:
+
+```bash
+/data-model
+```
+

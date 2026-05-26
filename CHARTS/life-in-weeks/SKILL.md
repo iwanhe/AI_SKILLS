@@ -218,3 +218,4 @@ End-of-run summary (info-only, to stderr):
 - A) Inputs – resolved birthday, target age, output path
 - B) Computed – `weeks_ahead / weeks_total` and grid dimensions (cols × rows)
 - C) File – wrote/overwrote `<target>`
+
