@@ -18,6 +18,8 @@ For ADT.ai `export_apex -reveal`, preserve old ADT console output shape: the con
 
 For ADT.ai `export_apex` exports, preserve old ADT progress output shape: print `APP <id>/<alias>, EXPORTING:` before format progress lines, use the old labels (`FULL APP EXPORT`, `SPLIT COMPONENTS`, etc.), make progress dots grow with completion percentage instead of filling the whole line at every refresh, and seed the ETA column from `config/apex_timers.yaml` previous-run averages until the final line shows elapsed time.
 
+For ADT.ai `export_apex` action execution, bind only parameters that are present in the selected action SQL text. Readable and embedded exports do not accept every full/split export option; tests must catch extra unsupported binds such as `with_comments`.
+
 
 ## Stamp
 
