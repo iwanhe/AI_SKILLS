@@ -12,6 +12,8 @@ ADT is invoked via a shell alias: `adt {command} {arguments}` (see the `adt-setu
 
 ADT.ai is the Python rewrite under `/Users/dobby/Library/CloudStorage/Dropbox/PROJECTS/ADT.ai`. For ADT.ai setup, use `SETUP.md`, `USAGE.md`, and `adtai doctor`; do not create connection files automatically unless Jan explicitly approves that scope.
 
+Before touching ADT.ai implementation files for board-scoped work, make the work visible in `TASKS/KANBAN_ADT.md`: create or select exactly one focused `## In Progress` card, add `#NOW`, and split broad work into sibling cards before implementation.
+
 For ADT.ai `export_apex`, do not carry over old ADT's `-all`, `-only`, `-no...` format flags, or configured export-format defaults. ADT.ai exports only the positive format flags named on the command line: `-full`, `-split`, `-readable`, `-embedded`, `-rest`, `-files`, and `-files_ws`.
 
 For ADT.ai `export_apex -reveal`, preserve old ADT console output shape: the connection/version block, `WORKSPACES:` heading, grouped `APEX APPLICATIONS: <group>` sections, compact application columns, old truncation, and timer are part of parity.
