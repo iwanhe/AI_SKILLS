@@ -1,6 +1,6 @@
 ---
 created: 2026-04-16
-updated: 2026-05-20
+updated: 2026-05-30
 name: adt
 description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and database CI/CD automation. Use this skill whenever the user needs to export database objects, export APEX applications, export data, create or deploy patches, recompile invalid objects, search APEX components, search Git history, or manage Oracle APEX deployment workflows. Triggers: adt, apex deployment, export database, export apex, export data, create patch, deploy patch, apex ci/cd, database export, patch creation, installation script, deployment order, recompile, invalid objects, compile, broken packages, native compilation, PLSQL_OPTIMIZE_LEVEL, search apex, search repo, find object, object references, restore file, git history, live upload, static files, upload css, upload js, minify."
 ---
@@ -9,6 +9,14 @@ description: "APEX Deployment Tool (ADT) — CLI tool for Oracle APEX and databa
 ADT is a Python-based CLI tool that automates the export, patching, and deployment of Oracle Database objects and APEX applications. It reads from Git, config files, and the database — it never stores metadata in the database itself. Source and docs: https://github.com/jkvetina/ADT.
 
 ADT is invoked via a shell alias: `adt {command} {arguments}` (see the `adt-setup` skill for installation and shell alias setup).
+
+ADT.ai is the Python rewrite under `/Users/dobby/Library/CloudStorage/Dropbox/PROJECTS/ADT.ai`. For ADT.ai setup, use `SETUP.md`, `USAGE.md`, and `adtai doctor`; do not create connection files automatically unless Jan explicitly approves that scope.
+
+For ADT.ai `export_apex`, do not carry over old ADT's `-all`, `-only`, `-no...` format flags, or configured export-format defaults. ADT.ai exports only the positive format flags named on the command line: `-full`, `-split`, `-readable`, `-embedded`, `-rest`, `-files`, and `-files_ws`.
+
+For ADT.ai `export_apex -reveal`, preserve old ADT console output shape: the connection/version block, `WORKSPACES:` heading, grouped `APEX APPLICATIONS: <group>` sections, compact application columns, old truncation, and timer are part of parity.
+
+For ADT.ai `export_apex` exports, preserve old ADT progress output shape: print `APP <id>/<alias>, EXPORTING:` before format progress lines, use the old labels (`FULL APP EXPORT`, `SPLIT COMPONENTS`, etc.), make progress dots grow with completion percentage instead of filling the whole line at every refresh, and seed the ETA column from `config/apex_timers.yaml` previous-run averages until the final line shows elapsed time.
 
 
 ## Stamp
@@ -399,4 +407,3 @@ Recompile invalid objects on DEV:
 ```bash
 adt recompile -target DEV
 ```
-
